@@ -6,34 +6,46 @@
 
 Projeto completo de **Cidade Inteligente (Smart City)** desenvolvido para feiras de ciências e robótica do Ensino Fundamental (6º ao 8º ano). O sistema utiliza um microcontrolador **ESP32 NodeMCU**, sensores ópticos reflexivos infravermelhos **TCRT5000** e controle de iluminação por **PWM (Modulação por Largura de Pulso)** de forma 100% não-bloqueante (`millis()`).
 
-Além do firmware embarcado pronto para gravação na placa, este repositório inclui um **Simulador Interativo 3D em HTML/WebGL** para apresentação em telão ou notebook durante a feira!
+Além do firmware embarcado pronto para gravação na placa, este repositório inclui um **Simulador Interativo 3D e Manual de Montagem em HTML/WebGL** para apresentação em telão ou notebook durante a feira!
 
 ---
 
-## ✨ Funcionalidades Principais
+## 📚 Documentação Organizada
 
-1. **Modo Noturno Ecológico (Brilho da Lua — 14%):** Quando não há veículos na pista, os postes permanecem acesos com 14% de potência (`PWM = 35/255`), garantindo visibilidade básica e economizando até **80% de energia elétrica**.
+Para facilitar a montagem da maquete física, calibração elétrica e o treinamento dos estudantes para o dia da apresentação, a documentação foi dividida em guias especializados na pasta [`docs/`](./docs/):
+
+- 🛠️ [**Manual de Montagem Física da Maquete (`docs/MONTAGEM_MAQUETE.md`)**](./docs/MONTAGEM_MAQUETE.md) — Lista de materiais (papelão, canudos, cola quente), medidas da pista (80 x 30 cm), furação para os sensores e organização dos fios no "porão técnico".
+- ⚡ [**Esquema Elétrico & Calibração dos Sensores (`docs/CIRCUITO_E_CALIBRACAO.md`)**](./docs/CIRCUITO_E_CALIBRACAO.md) — Diagrama esquemático, cálculo dos resistores de 220Ω, código de cores dos fios e passo a passo para regular o trimpot azul do TCRT5000.
+- 🎤 [**Roteiro de Apresentação para a Feira (`docs/ROTEIRO_APRESENTACAO.md`)**](./docs/ROTEIRO_APRESENTACAO.md) — Divisão da equipe em 3 apresentadores, falas ensaiadas de 1 minuto cada e respostas na ponta da língua para as perguntas dos juízes.
+- 🔌 [**Guia Rápido de Ligação (`WIRING.md`)**](./WIRING.md) — Sumário de pinos e referências rápidas de bancada.
+
+---
+
+## ✨ Funcionalidades do Projeto
+
+1. **Modo Noturno Ecológico (Brilho da Lua — 14%):** Quando a pista está livre, os postes permanecem acesos a 14% (`PWM = 35/255`), economizando até **80% de energia elétrica**.
 2. **Detecção Instantânea por Infravermelho:** Ao detectar a passagem de um carrinho no sensor **TCRT5000**, o setor correspondente eleva sua iluminação para **100% (`PWM = 255/255`)**.
-3. **Temporizador de Segurança (Regra dos 2,5 Segundos):** Após o veículo sair do sensor, os postes daquele setor continuam acesos em potência máxima por **2.500 ms** antes de começarem a diminuir o brilho.
-4. **Transição Suave (Efeito Fade In / Fade Out):** O aumento e a redução de brilho ocorrem de forma gradual a cada `15 ms`, evitando mudanças bruscas de luminosidade na via.
-5. **Filtro Digital de Ruído (Software Debounce):** Leituras falsas causadas por reflexos ou lâmpadas do ambiente são filtradas por uma janela de estabilidade de `30 ms`.
-6. **Arquitetura Sem Travamentos (`millis()`):** Zero uso de `delay()` no `loop()`, permitindo que todos os 4 setores funcionem simultaneamente de forma independente.
+3. **Temporizador de Segurança (Regra dos 2,5 Segundos):** Após o veículo sair do sensor, os postes continuam em potência máxima por **2.500 ms** antes de começarem a diminuir o brilho.
+4. **Transição Suave (Fade In / Fade Out):** Ajuste progressivo a cada `15 ms`, evitando transições bruscas que ofuscam a visão dos motoristas.
+5. **Filtro Digital de Ruído (Software Debounce):** Janela de estabilidade de `30 ms` para eliminar falsos alarmes causados pela luz do teto da feira.
+6. **Arquitetura sem Travamentos (`millis()`):** Zero uso de `delay()`, permitindo que todos os 4 setores operem de forma simultânea e independente.
 
 ---
 
-## 🖥️ Demonstração Interativa em 3D (`index.html`)
+## 🖥️ Central Web Interativa (`index.html`)
 
-O arquivo [`index.html`](./index.html) oferece uma central interativa dividida em **3 abas educativas**:
+O arquivo [`index.html`](./index.html) é uma aplicação web completa e autônoma, dividida em **4 seções interativas**:
 
-1. **🏙️ 1. Maquete 3D Interativa (Three.js):** Simulação em tempo real da pista com 4 setores, 8 postes de iluminação, 4 sensores infravermelhos e um carrinho que percorre a via acionando os postes.
-2. **⚡ 2. Eletricidade & PWM:** Animação do fluxo de elétrons passando pelo pino GPIO, resistor de 220Ω e LED, acompanhada de um osciloscópio digital de 5.000 Hz interativo.
-3. **💻 3. Código Explicado:** Visualizador interativo das principais funções do código em C++ com explicações didáticas para os alunos apresentarem aos avaliadores.
+1. **🏙️ 1. Maquete 3D Interativa (Three.js):** Pista 3D realista com asfalto, 8 postes, 4 sensores de pista e carrinho trafegando em tempo real.
+2. **⚡ 2. Eletricidade & PWM:** Animação dos elétrons pelo fio (ESP32 -> Resistor -> LED) com osciloscópio digital de 5.000 Hz ajustável.
+3. **💻 3. Código Explicado:** Navegador didático das 5 principais funções em C++ com explicações prontas para os alunos memorizarem.
+4. **🛠️ 4. Guia de Montagem da Maquete:** Planta baixa interativa com medidas em centímetros, passo a passo em sanfona e checklist de testes antes da feira.
 
-> **Como abrir:** Basta abrir o arquivo `index.html` diretamente em qualquer navegador moderno (Chrome, Edge, Firefox).
+> **Como visualizar:** Abra o arquivo `index.html` em qualquer navegador (Google Chrome, Edge, Firefox) dando dois cliques sobre ele.
 
 ---
 
-## 🔌 Mapeamento de Pinos (Pinout ESP32)
+## 🔌 Tabela Rápida de Pinos (ESP32)
 
 | Setor | Sensor Infravermelho (TCRT5000 `DO`) | LEDs do Poste (`Anodo +`) | Canal PWM |
 | :---: | :---: | :---: | :---: |
@@ -41,56 +53,41 @@ O arquivo [`index.html`](./index.html) oferece uma central interativa dividida e
 | **Setor 1** | `GPIO 19` | `GPIO 26` | Canal `1` |
 | **Setor 2** | `GPIO 21` | `GPIO 27` | Canal `2` |
 | **Setor 3** | `GPIO 22` | `GPIO 14` | Canal `3` |
-| **Alimentação** | `3V3` (3.3 Volts) | Resistor `220Ω` / `330Ω` em série | — |
-| **Terra Comum** | `GND` | `GND` | — |
-
-Para instruções detalhadas de montagem na protoboard, cores de fios, ajuste do trimpot do sensor e roteiro de fala para os alunos na feira, consulte o guia [**WIRING.md**](./WIRING.md).
+| **Alimentação** | `3V3` (3.3 Volts) | Resistor `220Ω` por LED | — |
+| **Terra** | `GND` | `GND` | — |
 
 ---
 
-## 📂 Estrutura do Projeto
+## 📂 Estrutura de Pastas do Repositório
 
 ```text
 smart-street-lighting/
 ├── include/
-│   ├── Config.hpp            # Pinos, constantes de brilho PWM e tempos (comentado em PT-BR)
-│   └── SectorController.hpp   # Declaração da classe ControladorSetor
+│   ├── Config.hpp                # Pinos, tempos e constantes de brilho comentados em português
+│   └── SectorController.hpp       # Declaração simplificada da classe ControladorSetor
 ├── src/
-│   ├── SectorController.cpp   # Lógica do filtro de ruído, regra dos 2,5s e efeito fade suave
-│   └── main.cpp              # Loop principal e painel de telemetria no Monitor Serial
-├── index.html                 # Apresentação interativa 3D + Circuito + Explorador de Código
-├── WIRING.md                 # Manual de montagem, calibração e roteiro de apresentação
-└── platformio.ini             # Configuração de build para ESP32 NodeMCU (esp32dev)
+│   ├── SectorController.cpp       # Implementação do debounce, regra dos 2,5s e fade suave
+│   └── main.cpp                  # Loop principal não-bloqueante e telemetria serial
+├── docs/
+│   ├── MONTAGEM_MAQUETE.md        # Manual físico de montagem: materiais, medidas e furação
+│   ├── CIRCUITO_E_CALIBRACAO.md   # Esquema elétrico, resistores e calibração do trimpot
+│   └── ROTEIRO_APRESENTACAO.md    # Roteiro de fala para os alunos e perguntas frequentes
+├── index.html                     # Central Web: 3D + Circuito + Código + Montagem
+├── WIRING.md                     # Guia rápido de ligação
+└── platformio.ini                 # Configuração do compilador para ESP32 NodeMCU
 ```
 
 ---
 
-## 🚀 Como Compilar e Gravar no ESP32
+## 🚀 Como Compilar e Enviar para o ESP32
 
-### Pré-requisitos
-- [VS Code](https://code.visualstudio.com/) + extensão [PlatformIO IDE](https://platformio.org/) instalada.
+```bash
+# 1. Compilar o código
+pio run
 
-### Passos
-1. Clone este repositório:
-   ```bash
-   git clone https://github.com/luisfpatrocinio/smart-street-lighting.git
-   cd smart-street-lighting
-   ```
-2. Compile o projeto:
-   ```bash
-   pio run
-   ```
-3. Conecte o ESP32 via cabo USB e envie o firmware:
-   ```bash
-   pio run --target upload
-   ```
-4. Visualize as mensagens em tempo real no Monitor Serial (velocidade `115200` baud):
-   ```bash
-   pio device monitor
-   ```
+# 2. Conectar o ESP32 no USB e gravar o firmware
+pio run --target upload
 
----
-
-## 📜 Licença
-
-Este projeto é de código aberto e livre para uso educacional em escolas, oficinas de robótica e feiras de ciências.
+# 3. Abrir o monitor serial (115200 baud)
+pio device monitor
+```

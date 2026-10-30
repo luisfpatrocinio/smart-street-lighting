@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Postes Inteligentes (Smart Street Lighting) — Demonstração Interativa</title>
+    <title>Postes Inteligentes (Smart Street Lighting) — Demonstração & Guia de Montagem</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,6 +20,7 @@
             --accent-cyan: #00f2fe;
             --accent-blue: #4facfe;
             --accent-yellow: #fcd34d;
+            --accent-green: #10b981;
             --accent-glow: rgba(0, 242, 254, 0.25);
             --text-main: #f3f4f6;
             --text-muted: #9ca3af;
@@ -48,7 +49,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            background: rgba(10, 14, 23, 0.85);
+            background: rgba(10, 14, 23, 0.88);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             z-index: 1000;
@@ -87,18 +88,19 @@
 
         .nav-links {
             display: flex;
-            gap: 1.5rem;
+            gap: 1rem;
         }
 
         .nav-link {
             color: var(--text-muted);
             text-decoration: none;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
             padding: 6px 14px;
             border-radius: 8px;
             transition: all 0.2s ease;
             cursor: pointer;
+            border: 1px solid transparent;
         }
 
         .nav-link:hover, .nav-link.active {
@@ -108,7 +110,8 @@
 
         .nav-link.active {
             color: var(--accent-cyan);
-            border: 1px solid rgba(0, 242, 254, 0.2);
+            border-color: rgba(0, 242, 254, 0.3);
+            background: rgba(0, 242, 254, 0.08);
         }
 
         /* Main Container */
@@ -538,12 +541,133 @@
         .code-var { color: #fcd34d; }
         .code-num { color: #a78bfa; }
 
+        /* SECTION 4: GUIA DE MONTAGEM DA MAQUETE */
+        .montagem-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 1.5rem;
+        }
+
+        .blueprint-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .blueprint-canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 260px;
+            background: #070d18;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .step-accordion {
+            background: #0f1626;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .step-accordion.active {
+            border-color: var(--accent-cyan);
+        }
+
+        .step-header {
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.95rem;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .step-header:hover {
+            background: rgba(0, 242, 254, 0.05);
+        }
+
+        .step-badge {
+            background: rgba(0, 242, 254, 0.15);
+            color: var(--accent-cyan);
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .step-body {
+            padding: 14px 16px;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+            border-top: 1px solid var(--border);
+            display: none;
+        }
+
+        .step-accordion.active .step-body {
+            display: block;
+        }
+
+        .checklist-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 12px;
+            background: #0f172a;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .checklist-item:hover {
+            background: #1e293b;
+        }
+
+        .checklist-item input {
+            margin-top: 3px;
+            accent-color: var(--accent-green);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .checklist-item.done {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
         @media (max-width: 1024px) {
             .sim-container { grid-template-columns: 1fr; }
             .circ-grid { grid-template-columns: 1fr; }
             .code-grid { grid-template-columns: 1fr; height: auto; }
             .code-sidebar { max-height: 250px; }
             .code-viewer { max-height: 400px; }
+            .montagem-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -559,6 +683,7 @@
             <a class="nav-link active" onclick="switchTab('sim3d')">🏙️ 1. Maquete 3D</a>
             <a class="nav-link" onclick="switchTab('circuito')">⚡ 2. Eletricidade & PWM</a>
             <a class="nav-link" onclick="switchTab('codigo')">💻 3. Código Explicado</a>
+            <a class="nav-link" onclick="switchTab('montagem')">🛠️ 4. Guia de Montagem</a>
         </div>
     </nav>
 
@@ -767,6 +892,124 @@
                 </div>
             </div>
         </section>
+
+        <!-- ================================================================= -->
+        <!-- SEÇÃO 4: GUIA DE MONTAGEM DA MAQUETE                             -->
+        <!-- ================================================================= -->
+        <section id="sec-montagem">
+            <div class="section-header">
+                <h2>🛠️ Como Construir a Maquete Física da Pista</h2>
+                <p>Passo a passo completo com medidas exatas, materiais simples e dicas práticas para a sua equipe construir uma maquete resistente e bonita para a feira!</p>
+            </div>
+
+            <div class="montagem-grid">
+                <div class="blueprint-card">
+                    <h3>📐 Planta Baixa e Medidas da Pista (80 cm x 30 cm)</h3>
+                    <div class="blueprint-canvas-wrap">
+                        <canvas id="blueprintCanvas"></canvas>
+                    </div>
+
+                    <!-- Passos Sanfonados (Accordion) -->
+                    <div class="steps-container">
+                        <div class="step-accordion active" onclick="toggleStep(0)">
+                            <div class="step-header">
+                                <span>Etapa 1: A Base de Papelão e o Asfalto</span>
+                                <span class="step-badge">80 x 30 cm</span>
+                            </div>
+                            <div class="step-body">
+                                1. Pegue uma placa de <strong>Papel Pluma (Foam Board)</strong> ou Papelão resistente de 80 cm x 30 cm.<br>
+                                2. Cole uma faixa central de <strong>cartolina ou EVA preto com 12 cm de largura</strong> (a pista).<br>
+                                3. Faça os 4 furos retangulares (1,5 x 1 cm) a <strong>10cm, 30cm, 50cm e 70cm</strong> da largada para encaixar os sensores TCRT5000.<br>
+                                4. Desenhe as faixas tracejadas brancas com fita crepe ou corretivo escolar.
+                            </div>
+                        </div>
+
+                        <div class="step-accordion" onclick="toggleStep(1)">
+                            <div class="step-header">
+                                <span>Etapa 2: Fabricando os 8 Postes de Luz</span>
+                                <span class="step-badge">Canudos + LEDs</span>
+                            </div>
+                            <div class="step-body">
+                                1. Corte 8 canudos plásticos rígidos pretos com cerca de <strong>10 a 12 cm de altura</strong>.<br>
+                                2. Na perna maior do LED (Ânodo +), conecte o <strong>resistor de 220Ω</strong> e solde/emende um fio fino.<br>
+                                3. Na perna menor (Cátodo -), solde o fio de terra.<br>
+                                4. Isole bem com fita isolante e passe os fios por dentro do canudo até o topo!<br>
+                                5. Cole o canudo em pé na calçada com uma gotinha de cola quente.
+                            </div>
+                        </div>
+
+                        <div class="step-accordion" onclick="toggleStep(2)">
+                            <div class="step-header">
+                                <span>Etapa 3: Fixando os Sensores TCRT5000 no Chão</span>
+                                <span class="step-badge">Subterrâneo</span>
+                            </div>
+                            <div class="step-body">
+                                1. O sensor TCRT5000 possui 2 "olhinhos": um transparente (emissor) e um preto (receptor).<br>
+                                2. Encaixe a plaquinha <strong>por baixo da base</strong> para que apenas os olhinhos fiquem rentes ao asfalto apontando para cima.<br>
+                                3. Cole com cola quente ou fita dupla-face reforçada, sem tampar a lente dos olhinhos!
+                            </div>
+                        </div>
+
+                        <div class="step-accordion" onclick="toggleStep(3)">
+                            <div class="step-header">
+                                <span>Etapa 4: Organização dos Fios & Calibração</span>
+                                <span class="step-badge">Testes Finais</span>
+                            </div>
+                            <div class="step-body">
+                                1. Coloque 4 pezinhos de borracha ou calços de 4 cm embaixo da maquete para criar o <strong>porão técnico</strong>.<br>
+                                2. Todos os fios dos postes e sensores descem pelos furinhos e ficam escondidos embaixo da mesa!<br>
+                                3. Com o carrinho na mão, passe por cada setor e use uma chavinha de fenda no parafusinho azul (trimpot) para deixar a detecção 100% perfeita.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Checklist de Bancada -->
+                <div class="checklist-card">
+                    <h3>✅ Checklist Antes da Feira</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Marque cada item conforme sua equipe for concluindo os testes na bancada:</p>
+
+                    <label class="checklist-item" onclick="toggleCheckItem(this)">
+                        <input type="checkbox">
+                        <span>Todos os 8 postes acendem fraquinhos ao ligar o cabo USB</span>
+                    </label>
+
+                    <label class="checklist-item" onclick="toggleCheckItem(this)">
+                        <input type="checkbox">
+                        <span>Sensor 0 acende o Setor 0 ao passar o carrinho de brinquedo</span>
+                    </label>
+
+                    <label class="checklist-item" onclick="toggleCheckItem(this)">
+                        <input type="checkbox">
+                        <span>A luz segura os 2,5 segundos antes de apagar devagarzinho</span>
+                    </label>
+
+                    <label class="checklist-item" onclick="toggleCheckItem(this)">
+                        <input type="checkbox">
+                        <span>Os setores 1, 2 e 3 funcionam perfeitamente sem falhas</span>
+                    </label>
+
+                    <label class="checklist-item" onclick="toggleCheckItem(this)">
+                        <input type="checkbox">
+                        <span>Nenhum fio solto visível por cima da pista (tudo no porão)</span>
+                    </label>
+
+                    <label class="checklist-item" onclick="toggleCheckItem(this)">
+                        <input type="checkbox">
+                        <span>Chavinha de fenda pequena guardada no estojo para ajustes</span>
+                    </label>
+
+                    <label class="checklist-item" onclick="toggleCheckItem(this)">
+                        <input type="checkbox">
+                        <span>Carregador portátil (Powerbank) ou notebook com cabo USB</span>
+                    </label>
+
+                    <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 12px; font-size: 0.85rem; color: #a7f3d0;">
+                        🎉 <strong>Dica de Ouro:</strong> Treine o roteiro de 3 minutos da pasta <code>docs/ROTEIRO_APRESENTACAO.md</code> para impressionar os jurados!
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- SCRIPT DA APLICAÇÃO -->
@@ -788,6 +1031,10 @@
             } else if (tabId === 'codigo') {
                 document.querySelector('.nav-links a:nth-child(3)').classList.add('active');
                 document.getElementById('sec-codigo').classList.add('active');
+            } else if (tabId === 'montagem') {
+                document.querySelector('.nav-links a:nth-child(4)').classList.add('active');
+                document.getElementById('sec-montagem').classList.add('active');
+                renderBlueprint();
             }
         }
 
@@ -891,7 +1138,6 @@
 
         function buildStreetlamps() {
             SECTORS_DATA.forEach(sec => {
-                // Cada setor tem 2 postes (um ao norte e outro ao sul da rua)
                 [-4.6, 4.6].forEach((zPos, idx) => {
                     const postGroup = new THREE.Group();
                     postGroup.position.set(sec.poleX, 0, zPos);
@@ -906,7 +1152,6 @@
                     // Braço curvo superior
                     const armGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.6, 12);
                     const arm = new THREE.Mesh(armGeo, poleMat);
-                    arm.rotation.z = (zPos > 0) ? 0 : 0;
                     arm.rotation.x = (zPos > 0) ? -Math.PI / 3 : Math.PI / 3;
                     arm.position.set(0, 5.2, (zPos > 0) ? -0.6 : 0.6);
                     postGroup.add(arm);
@@ -944,14 +1189,12 @@
 
         function buildSensors() {
             SECTORS_DATA.forEach(sec => {
-                // Módulo TCRT5000 embutido no asfalto com seus dois olhinhos IR
                 const boxGeo = new THREE.BoxGeometry(0.6, 0.1, 0.9);
                 const boxMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
                 const sensorBox = new THREE.Mesh(boxGeo, boxMat);
                 sensorBox.position.set(sec.poleX, 0.05, 1.2);
                 scene.add(sensorBox);
 
-                // LED Emissor (Olho transparente) e Detector (Olho preto)
                 const eyeGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.15, 12);
                 const eyeEmitMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
                 const eyeRecMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
@@ -964,7 +1207,6 @@
                 eye2.position.set(sec.poleX + 0.15, 0.12, 1.2);
                 scene.add(eye2);
 
-                // Feixe de luz infravermelha virtual (mostra quando detecta)
                 const beamGeo = new THREE.CylinderGeometry(0.02, 0.3, 1.8, 16, 1, true);
                 const beamMat = new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.0 });
                 const beam = new THREE.Mesh(beamGeo, beamMat);
@@ -978,21 +1220,18 @@
         function buildCar() {
             carGroup = new THREE.Group();
 
-            // Chassi do carro de brinquedo
             const bodyGeo = new THREE.BoxGeometry(2.4, 0.7, 1.2);
             const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, metalness: 0.6, roughness: 0.3 });
             const body = new THREE.Mesh(bodyGeo, bodyMat);
             body.position.y = 0.55;
             carGroup.add(body);
 
-            // Cabine / Vidros
             const cabinGeo = new THREE.BoxGeometry(1.3, 0.55, 1.0);
             const cabinMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.1 });
             const cabin = new THREE.Mesh(cabinGeo, cabinMat);
             cabin.position.set(-0.2, 1.1, 0);
             carGroup.add(cabin);
 
-            // Faróis dianteiros acesos
             const lightGeo = new THREE.SphereGeometry(0.1, 8, 8);
             const lightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
             const headL = new THREE.Mesh(lightGeo, lightMat);
@@ -1002,7 +1241,6 @@
             carGroup.add(headL);
             carGroup.add(headR);
 
-            // 4 Rodas
             const wheelGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.2, 16);
             const wheelMat = new THREE.MeshStandardMaterial({ color: 0x09090b });
             const wheelsPos = [
@@ -1026,6 +1264,7 @@
             camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(container.clientWidth, container.clientHeight);
+            resizeCanvases();
         }
 
         // ====================================================================
@@ -1038,67 +1277,57 @@
             const dt = (now - lastTime) / 1000;
             lastTime = now;
 
-            // Movimento do Carrinho
             if (isDriving) {
                 carPos += 7.0 * dt;
                 if (carPos > 20) {
-                    carPos = -20; // Volta para o início da pista
+                    carPos = -20;
                 }
                 carGroup.position.x = carPos;
             }
 
-            // Atualização dos 4 Setores
             let activeSectorCount = 0;
 
             SECTORS_DATA.forEach(sec => {
-                // Checa se o carrinho está passando pelo sensor deste setor
                 const carNearSensor = Math.abs(carPos - sec.poleX) < 1.4;
 
                 if (carNearSensor) {
                     sec.detected = true;
-                    sec.targetDuty = 255; // 100%
-                    sec.holdTimer = now;  // Renova os 2,5 segundos
+                    sec.targetDuty = 255;
+                    sec.holdTimer = now;
                     activeSectorCount++;
                 } else {
                     sec.detected = false;
-                    // Regra dos 2,5s (2500 ms)
                     if (now - sec.holdTimer < 2500) {
-                        sec.targetDuty = 255; // Mantém aceso
+                        sec.targetDuty = 255;
                     } else {
-                        sec.targetDuty = 35;  // Modo Noturno Econômico (14%)
+                        sec.targetDuty = 35;
                     }
                 }
 
-                // Efeito suave de transição (Fade In / Fade Out)
                 if (sec.curDuty < sec.targetDuty) {
                     sec.curDuty = Math.min(sec.targetDuty, sec.curDuty + 350 * dt);
                 } else if (sec.curDuty > sec.targetDuty) {
                     sec.curDuty = Math.max(sec.targetDuty, sec.curDuty - 140 * dt);
                 }
 
-                // Aplica a intensidade na luz do poste 3D
                 const intensityRatio = sec.curDuty / 255.0;
                 const lightPower = 0.2 + intensityRatio * 2.8;
 
                 if (sec.lightA) sec.lightA.intensity = lightPower;
                 if (sec.lightB) sec.lightB.intensity = lightPower;
 
-                // Atualiza feixe do sensor infravermelho
                 const sensorObj = sensorMeshes.find(s => s.sectorId === sec.id);
                 if (sensorObj) {
                     sensorObj.beamMat.opacity = THREE.MathUtils.lerp(sensorObj.beamMat.opacity, sec.detected ? 0.75 : 0.0, 0.2);
                 }
 
-                // Atualiza a cor do bulbo da lâmpada
                 lampBulbMeshes.filter(b => b.sectorId === sec.id).forEach(b => {
                     b.mesh.material.color.setRGB(1.0, 0.9 + 0.1 * intensityRatio, 0.4 + 0.6 * intensityRatio);
                 });
 
-                // Atualiza Sidebar do Setor
                 updateSectorUI(sec);
             });
 
-            // Atualiza o crachá superior
             const badge = document.getElementById('simBadge');
             if (activeSectorCount > 0) {
                 badge.innerText = "🚗 VEÍCULO NA PISTA • ILUMINAÇÃO TOTAL NO SETOR ATIVO";
@@ -1108,7 +1337,6 @@
                 badge.style.color = "var(--accent-cyan)";
             }
 
-            // Atualiza relógio
             const secTime = Math.floor(now / 1000);
             const mins = String(Math.floor(secTime / 60)).padStart(2, '0');
             const secs = String(secTime % 60).padStart(2, '0');
@@ -1201,12 +1429,21 @@
         function resizeCanvases() {
             const circCanvas = document.getElementById('circuitCanvas');
             const pwmCanvas = document.getElementById('pwmCanvas');
-            if (!circCanvas || !pwmCanvas) return;
+            const blueprintCanvas = document.getElementById('blueprintCanvas');
 
-            circCanvas.width = circCanvas.parentElement.clientWidth;
-            circCanvas.height = circCanvas.parentElement.clientHeight;
-            pwmCanvas.width = pwmCanvas.parentElement.clientWidth;
-            pwmCanvas.height = pwmCanvas.parentElement.clientHeight;
+            if (circCanvas && circCanvas.parentElement) {
+                circCanvas.width = circCanvas.parentElement.clientWidth;
+                circCanvas.height = circCanvas.parentElement.clientHeight;
+            }
+            if (pwmCanvas && pwmCanvas.parentElement) {
+                pwmCanvas.width = pwmCanvas.parentElement.clientWidth;
+                pwmCanvas.height = pwmCanvas.parentElement.clientHeight;
+            }
+            if (blueprintCanvas && blueprintCanvas.parentElement) {
+                blueprintCanvas.width = blueprintCanvas.parentElement.clientWidth;
+                blueprintCanvas.height = blueprintCanvas.parentElement.clientHeight;
+                renderBlueprint();
+            }
         }
 
         function renderCircuit() {
@@ -1218,19 +1455,17 @@
 
             ctx.clearRect(0, 0, w, h);
 
-            // Coordenadas do Circuito
             const espX = 40, espY = 60, espW = 100, espH = 160;
             const resX = 220, resY = 90;
             const ledX = 340, ledY = 90;
 
-            // 1. Desenho do ESP32 NodeMCU
+            // 1. ESP32 NodeMCU
             ctx.fillStyle = "#1e293b";
             ctx.strokeStyle = "#00f2fe";
             ctx.lineWidth = 2;
             ctx.fillRect(espX, espY, espW, espH);
             ctx.strokeRect(espX, espY, espW, espH);
 
-            // Etiqueta do ESP32
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 13px Plus Jakarta Sans";
             ctx.fillText("ESP32", espX + 26, espY + 30);
@@ -1238,15 +1473,12 @@
             ctx.font = "11px Plus Jakarta Sans";
             ctx.fillText("NodeMCU", espX + 22, espY + 48);
 
-            // Pino GPIO 25 (Saída PWM)
             ctx.fillStyle = "#38bdf8";
             ctx.fillText("GPIO 25 ●", espX + 35, espY + 85);
-
-            // Pino GND
             ctx.fillStyle = "#94a3b8";
             ctx.fillText("GND     ●", espX + 35, espY + 140);
 
-            // 2. Fio Superior (GPIO 25 -> Resistor -> LED)
+            // 2. Fio Superior
             ctx.beginPath();
             ctx.strokeStyle = "#38bdf8";
             ctx.lineWidth = 3;
@@ -1292,7 +1524,7 @@
             ctx.font = "bold 12px Plus Jakarta Sans";
             ctx.fillText("💡 LED POSTE", ledX - 10, espY + 120);
 
-            // 3. Fio de Retorno (GND)
+            // 3. Fio GND
             ctx.beginPath();
             ctx.strokeStyle = "#64748b";
             ctx.lineWidth = 3;
@@ -1302,12 +1534,11 @@
             ctx.lineTo(espX + espW, espY + 135);
             ctx.stroke();
 
-            // 4. Animação dos Elétrons fluindo (Velocidade e densidade variam com o PWM)
+            // 4. Animação de Elétrons
             if (currentPwmPct > 0) {
                 electronPhase += (currentPwmPct / 100) * 4;
                 ctx.fillStyle = "#00f2fe";
 
-                // Caminho dos elétrons
                 const points = [
                     { x1: espX + espW, y1: espY + 80, x2: resX - 30, y2: espY + 80 },
                     { x1: rx, y1: espY + 80, x2: ledX, y2: espY + 80 },
@@ -1346,7 +1577,6 @@
 
             ctx.clearRect(0, 0, w, h);
 
-            // Grade do Osciloscópio
             ctx.strokeStyle = "#132035";
             ctx.lineWidth = 1;
             for (let x = 0; x < w; x += 30) {
@@ -1360,7 +1590,6 @@
                 ctx.stroke();
             }
 
-            // Níveis 3.3V e 0V
             const yHigh = 70;
             const yLow = 190;
 
@@ -1369,9 +1598,8 @@
             ctx.fillText("+3.3V (Ligado)", 15, yHigh - 8);
             ctx.fillText(" 0.0V (Desligado)", 15, yLow + 18);
 
-            // Onda Quadrada PWM
             scopeOffset += 3.5;
-            const period = 120; // Tamanho de um ciclo de onda no gráfico
+            const period = 120;
             const onTime = period * (currentPwmPct / 100);
 
             ctx.beginPath();
@@ -1393,9 +1621,8 @@
                 }
             }
             ctx.stroke();
-            ctx.shadowBlur = 0; // Desativa o glow para os textos
+            ctx.shadowBlur = 0;
 
-            // Estatísticas no rodapé do osciloscópio
             ctx.fillStyle = "#ffffff";
             ctx.font = "bold 12px JetBrains Mono";
             ctx.fillText(`Frequencia: 5.000 Hz   |   Periodo: 200 µs   |   Ligado: ${currentPwmPct}%   |   Desligado: ${100 - currentPwmPct}%`, 20, h - 18);
@@ -1533,6 +1760,105 @@
             document.getElementById('codeFileLabel').innerText = `📄 ${topic.file}`;
             document.getElementById('codeExplanation').innerHTML = topic.explanation;
             document.getElementById('codeSnippetArea').innerHTML = topic.snippet;
+        }
+
+        // ====================================================================
+        // SEÇÃO 4: PLANTA BAIXA INTERATIVA (CANVAS)
+        // ====================================================================
+        function renderBlueprint() {
+            const canvas = document.getElementById('blueprintCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Base total (80 x 30 cm proporcional)
+            const marginX = 30, marginY = 30;
+            const boardW = w - marginX * 2;
+            const boardH = h - marginY * 2;
+
+            // Fundo da placa de madeira / papelão
+            ctx.fillStyle = "#1e293b";
+            ctx.strokeStyle = "#475569";
+            ctx.lineWidth = 2;
+            ctx.fillRect(marginX, marginY, boardW, boardH);
+            ctx.strokeRect(marginX, marginY, boardW, boardH);
+
+            // Asfalto Central (12 cm proporcional)
+            const roadH = boardH * 0.45;
+            const roadY = marginY + (boardH - roadH) / 2;
+            ctx.fillStyle = "#090d16";
+            ctx.fillRect(marginX, roadY, boardW, roadH);
+
+            // Faixas Tracejadas
+            ctx.strokeStyle = "#e2e8f0";
+            ctx.lineWidth = 2;
+            ctx.setLineDash([12, 8]);
+            ctx.beginPath();
+            ctx.moveTo(marginX, roadY + roadH / 2);
+            ctx.lineTo(marginX + boardW, roadY + roadH / 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Posições dos 4 Setores
+            const sectorDist = boardW / 4;
+            const sensorOffsets = [0.125, 0.375, 0.625, 0.875];
+
+            sensorOffsets.forEach((ratio, idx) => {
+                const posX = marginX + boardW * ratio;
+
+                // Furo do Sensor (Quadrinho Vermelho/Azul)
+                ctx.fillStyle = "#ef4444";
+                ctx.fillRect(posX - 8, roadY + roadH / 2 - 8, 16, 16);
+                ctx.strokeStyle = "#ffffff";
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(posX - 8, roadY + roadH / 2 - 8, 16, 16);
+
+                // Postes A e B (Círculos Amarelos)
+                ctx.fillStyle = "#fcd34d";
+                ctx.beginPath();
+                ctx.arc(posX, roadY - 14, 7, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(posX, roadY + roadH + 14, 7, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Textos descritivos
+                ctx.fillStyle = "#38bdf8";
+                ctx.font = "bold 11px Plus Jakarta Sans";
+                ctx.fillText(`SETOR ${idx}`, posX - 24, marginY + 16);
+
+                ctx.fillStyle = "#94a3b8";
+                ctx.font = "10px JetBrains Mono";
+                const cmPos = 10 + idx * 20;
+                ctx.fillText(`${cmPos} cm`, posX - 14, marginY + boardH - 8);
+            });
+
+            // Régua / Legenda
+            ctx.fillStyle = "#fcd34d";
+            ctx.fillText("🟡 Poste de LED", marginX + 10, h - 8);
+            ctx.fillStyle = "#ef4444";
+            ctx.fillText("🟥 Sensor TCRT5000", marginX + 130, h - 8);
+            ctx.fillStyle = "#94a3b8";
+            ctx.fillText("Base: 80 cm x 30 cm", w - 160, h - 8);
+        }
+
+        function toggleStep(stepIdx) {
+            const accordions = document.querySelectorAll('.step-accordion');
+            accordions.forEach((acc, i) => {
+                if (i === stepIdx) acc.classList.toggle('active');
+                else acc.classList.remove('active');
+            });
+        }
+
+        function toggleCheckItem(labelEl) {
+            const checkbox = labelEl.querySelector('input');
+            labelEl.classList.toggle('done', checkbox.checked);
         }
 
         // ====================================================================
