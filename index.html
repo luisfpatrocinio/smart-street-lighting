@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Postes Inteligentes (Smart Street Lighting) — Demonstração Interativa</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0a0e17;
+            --bg-card: #111827;
+            --bg-card-hover: #1f293d;
+            --accent-cyan: #00f2fe;
+            --accent-blue: #4facfe;
+            --accent-yellow: #fcd34d;
+            --accent-glow: rgba(0, 242, 254, 0.25);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border: #1f293d;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Top Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(10, 14, 23, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 2rem;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 1.15rem;
+            color: #fff;
+        }
+
+        .nav-brand span {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .badge-edu {
+            background: rgba(252, 211, 77, 0.15);
+            color: var(--accent-yellow);
+            border: 1px solid rgba(252, 211, 77, 0.3);
+            font-size: 0.75rem;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #fff;
+            background: var(--bg-card-hover);
+        }
+
+        .nav-link.active {
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+        }
+
+        /* Main Container */
+        main {
+            margin-top: 70px;
+            padding: 1.5rem 2rem;
+            max-width: 1440px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Section Titles */
+        .section-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            margin-top: 4px;
+        }
+
+        /* SECTION 1: 3D SIMULATION */
+        .sim-container {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .viewport-3d-wrapper {
+            position: relative;
+            width: 100%;
+            height: 580px;
+            background: #050810;
+        }
+
+        #canvas3d {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .sim-overlay-controls {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            display: flex;
+            gap: 10px;
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            z-index: 10;
+        }
+
+        .sim-btn {
+            background: var(--bg-card-hover);
+            color: #fff;
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .sim-btn:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            border-color: var(--accent-cyan);
+        }
+
+        .sim-btn.active {
+            background: var(--accent-blue);
+            color: #fff;
+        }
+
+        .sim-info-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+            font-weight: 700;
+            pointer-events: none;
+        }
+
+        /* 3D Sidebar Telemetry */
+        .sim-sidebar {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            background: #0d131f;
+            border-left: 1px solid var(--border);
+            overflow-y: auto;
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sector-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .sector-card.active-sector {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .sector-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .sensor-tag {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            background: #26334d;
+            color: var(--text-muted);
+        }
+
+        .sensor-tag.detected {
+            background: #ef4444;
+            color: #fff;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.8; }
+            to { opacity: 1; filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8)); }
+        }
+
+        .sector-meter {
+            height: 8px;
+            background: #1e293b;
+            border-radius: 999px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .sector-meter-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #fcd34d, #00f2fe);
+            width: 14%;
+            transition: width 0.1s linear;
+        }
+
+        .sector-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* SECTION 2: CIRCUITO & PWM */
+        .circ-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .circ-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .circ-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .circ-canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            background: #080d16;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .circ-canvas-wrap canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #1e293b;
+            outline: none;
+            accent-color: var(--accent-cyan);
+            cursor: pointer;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .preset-btn {
+            flex: 1;
+            background: var(--bg-card-hover);
+            border: 1px solid var(--border);
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .explanation-box {
+            background: rgba(0, 242, 254, 0.05);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+        }
+
+        .explanation-box strong {
+            color: var(--accent-cyan);
+        }
+
+        /* SECTION 3: CÓDIGO E FUNÇÕES */
+        .code-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            height: 640px;
+        }
+
+        .code-sidebar {
+            background: #0d131f;
+            border-right: 1px solid var(--border);
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+        }
+
+        .code-menu-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-main);
+        }
+
+        .code-menu-btn:hover {
+            border-color: var(--accent-cyan);
+            background: var(--bg-card-hover);
+        }
+
+        .code-menu-btn.active {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 242, 254, 0.1);
+        }
+
+        .code-menu-btn h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .code-menu-btn p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        .code-main-area {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .code-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 18px;
+            background: #0b101a;
+            border-bottom: 1px solid var(--border);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+        }
+
+        .code-explanation-banner {
+            background: #141e2e;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.92rem;
+            color: #f1f5f9;
+            line-height: 1.5;
+        }
+
+        .code-explanation-banner strong {
+            color: var(--accent-yellow);
+        }
+
+        .code-viewer {
+            flex: 1;
+            padding: 18px;
+            background: #080d16;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+        }
+
+        .code-line-highlight {
+            background: rgba(0, 242, 254, 0.15);
+            border-left: 4px solid var(--accent-cyan);
+            display: block;
+            padding-left: 8px;
+            margin: 2px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .code-comment { color: #6b7280; font-style: italic; }
+        .code-keyword { color: #f472b6; font-weight: 700; }
+        .code-type { color: #60a5fa; }
+        .code-func { color: #34d399; }
+        .code-var { color: #fcd34d; }
+        .code-num { color: #a78bfa; }
+
+        @media (max-width: 1024px) {
+            .sim-container { grid-template-columns: 1fr; }
+            .circ-grid { grid-template-columns: 1fr; }
+            .code-grid { grid-template-columns: 1fr; height: auto; }
+            .code-sidebar { max-height: 250px; }
+            .code-viewer { max-height: 400px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP NAVIGATION -->
+    <nav>
+        <div class="nav-brand">
+            <span>⚡ SMART CITY</span> — Iluminação Inteligente
+            <span class="badge-edu">Feira de Robótica 6º-8º Ano</span>
+        </div>
+        <div class="nav-links">
+            <a class="nav-link active" onclick="switchTab('sim3d')">🏙️ 1. Maquete 3D</a>
+            <a class="nav-link" onclick="switchTab('circuito')">⚡ 2. Eletricidade & PWM</a>
+            <a class="nav-link" onclick="switchTab('codigo')">💻 3. Código Explicado</a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- ================================================================= -->
+        <!-- SEÇÃO 1: MAQUETE 3D INTERATIVA                                   -->
+        <!-- ================================================================= -->
+        <section id="sec-sim3d" class="active">
+            <div class="section-header">
+                <h2>🏙️ Projeto Funcionando na Prática (Simulação 3D)</h2>
+                <p>Veja os 4 setores da pista em tempo real. Passe com o carrinho pelos sensores infravermelhos e observe os postes acendendo e apagando suavemente!</p>
+            </div>
+
+            <div class="sim-container">
+                <div class="viewport-3d-wrapper">
+                    <div class="sim-info-badge" id="simBadge">🚗 PISTA LIVRE • MODO NOTURNO (14% DE LUZ)</div>
+                    <canvas id="canvas3d"></canvas>
+                    
+                    <div class="sim-overlay-controls">
+                        <button class="sim-btn" onclick="toggleDrive()" id="btnDrive">▶ Iniciar Carrinho</button>
+                        <button class="sim-btn" onclick="resetCar()">⏪ Reiniciar Posição</button>
+                        <button class="sim-btn" onclick="toggleNight()" id="btnNight">🌙 Modo Noite</button>
+                        <button class="sim-btn" onclick="resetCamera()">🎥 Redefinir Câmera</button>
+                    </div>
+                </div>
+
+                <!-- Painel de Telemetria Lateral dos 4 Setores -->
+                <div class="sim-sidebar">
+                    <div class="sidebar-title">
+                        <span>Status dos 4 Setores</span>
+                        <span style="font-size: 0.8rem; color: var(--accent-cyan);" id="liveClock">00:00</span>
+                    </div>
+
+                    <!-- Setor 0 -->
+                    <div class="sector-card" id="card-sec-0">
+                        <div class="sector-card-header">
+                            <span>Setor 0 (Poste A & B)</span>
+                            <span class="sensor-tag" id="tag-sec-0">LIVRE</span>
+                        </div>
+                        <div class="sector-meter">
+                            <div class="sector-meter-fill" id="meter-sec-0"></div>
+                        </div>
+                        <div class="sector-meta">
+                            <span id="state-sec-0">MODO ECONOMICO</span>
+                            <span id="pct-sec-0">14%</span>
+                        </div>
+                    </div>
+
+                    <!-- Setor 1 -->
+                    <div class="sector-card" id="card-sec-1">
+                        <div class="sector-card-header">
+                            <span>Setor 1 (Poste C & D)</span>
+                            <span class="sensor-tag" id="tag-sec-1">LIVRE</span>
+                        </div>
+                        <div class="sector-meter">
+                            <div class="sector-meter-fill" id="meter-sec-1"></div>
+                        </div>
+                        <div class="sector-meta">
+                            <span id="state-sec-1">MODO ECONOMICO</span>
+                            <span id="pct-sec-1">14%</span>
+                        </div>
+                    </div>
+
+                    <!-- Setor 2 -->
+                    <div class="sector-card" id="card-sec-2">
+                        <div class="sector-card-header">
+                            <span>Setor 2 (Poste E & F)</span>
+                            <span class="sensor-tag" id="tag-sec-2">LIVRE</span>
+                        </div>
+                        <div class="sector-meter">
+                            <div class="sector-meter-fill" id="meter-sec-2"></div>
+                        </div>
+                        <div class="sector-meta">
+                            <span id="state-sec-2">MODO ECONOMICO</span>
+                            <span id="pct-sec-2">14%</span>
+                        </div>
+                    </div>
+
+                    <!-- Setor 3 -->
+                    <div class="sector-card" id="card-sec-3">
+                        <div class="sector-card-header">
+                            <span>Setor 3 (Poste G & H)</span>
+                            <span class="sensor-tag" id="tag-sec-3">LIVRE</span>
+                        </div>
+                        <div class="sector-meter">
+                            <div class="sector-meter-fill" id="meter-sec-3"></div>
+                        </div>
+                        <div class="sector-meta">
+                            <span id="state-sec-3">MODO ECONOMICO</span>
+                            <span id="pct-sec-3">14%</span>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 0.8rem; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+                        💡 <strong>Para mostrar aos juízes:</strong> Você pode clicar com o mouse e arrastar a maquete 3D para olhar de qualquer ângulo!
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- SEÇÃO 2: CIRCUITO ELÉTRICO & CONTROLE DE ENERGIA (PWM)           -->
+        <!-- ================================================================= -->
+        <section id="sec-circuito">
+            <div class="section-header">
+                <h2>⚡ Destaque para a Corrente Elétrica & PWM</h2>
+                <p>Como o ESP32 consegue controlar o brilho dos postes sem queimar os LEDs e sem esquentar? Veja os elétrons correndo no fio!</p>
+            </div>
+
+            <div class="circ-grid">
+                <!-- Card 1: Circuito Elétrico Animado -->
+                <div class="circ-card">
+                    <h3>🔋 Fluxo de Corrente no Circuito do Poste</h3>
+                    <div class="circ-canvas-wrap">
+                        <canvas id="circuitCanvas"></canvas>
+                    </div>
+
+                    <div class="explanation-box">
+                        <strong>🔵 O que está acontecendo aqui?</strong><br>
+                        Os pontos azuis são os <strong>elétrons</strong> fluindo pelo fio! O ESP32 envia 3.3V pelo pino GPIO. A corrente passa pelo <strong>resistor de 220Ω</strong> (que diminui a força da corrente para proteger o LED) e faz o LED brilhar!
+                    </div>
+                </div>
+
+                <!-- Card 2: Osciloscópio PWM -->
+                <div class="circ-card">
+                    <h3>🌊 O que o ESP32 Realmente Faz: Sinal PWM (5.000 Hz)</h3>
+                    <div class="circ-canvas-wrap">
+                        <canvas id="pwmCanvas"></canvas>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Potência Desejada (Duty Cycle):</span>
+                            <span id="pwmValueLabel" style="color: var(--accent-cyan); font-weight: 700;">14% (Brilho da Lua)</span>
+                        </div>
+                        <input type="range" min="0" max="100" value="14" class="slider" id="pwmSlider" oninput="updatePwmDemo(this.value)">
+                    </div>
+
+                    <div class="preset-buttons">
+                        <button class="preset-btn" onclick="setPwmPreset(0)">0% (Apagado)</button>
+                        <button class="preset-btn" onclick="setPwmPreset(14)">14% (Econômico)</button>
+                        <button class="preset-btn" onclick="setPwmPreset(50)">50% (Médio)</button>
+                        <button class="preset-btn" onclick="setPwmPreset(100)">100% (Carro)</button>
+                    </div>
+
+                    <div class="explanation-box">
+                        <strong>💡 O Segredo do PWM (Pulsos Rápidos):</strong><br>
+                        O ESP32 não diminui a voltagem de verdade! Ele liga e desliga o pino <strong>5.000 vezes por segundo</strong>. Quando queremos 14% de luz, ele fica ligado apenas 14% do tempo e desligado 86% do tempo. Como é rápido demais, o nosso olho enxerga apenas uma luz suave!
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- SEÇÃO 3: CÓDIGO E SUAS PRINCIPAIS FUNÇÕES                        -->
+        <!-- ================================================================= -->
+        <section id="sec-codigo">
+            <div class="section-header">
+                <h2>💻 O Código por Dentro e Suas Principais Funções</h2>
+                <p>Clique nas funções abaixo para entender como cada linha de programação comanda os postes e os sensores na maquete.</p>
+            </div>
+
+            <div class="code-grid">
+                <!-- Menu Lateral das Funções Principais -->
+                <div class="code-sidebar">
+                    <div class="code-menu-btn active" onclick="showCodeTopic('debounce')">
+                        <h4>🛡️ 1. Filtro de Ruído</h4>
+                        <p>Evita que a luz da sala dê falsos alarmes no sensor de infravermelho.</p>
+                    </div>
+
+                    <div class="code-menu-btn" onclick="showCodeTopic('regra25')">
+                        <h4>⏱️ 2. Regra dos 2,5s</h4>
+                        <p>Mantém a luz 100% acesa para o carrinho passar com segurança.</p>
+                    </div>
+
+                    <div class="code-menu-btn" onclick="showCodeTopic('fade')">
+                        <h4>✨ 3. Transição Suave (Fade)</h4>
+                        <p>Ajusta o brilho aos pouquinhos para não assustar o motorista.</p>
+                    </div>
+
+                    <div class="code-menu-btn" onclick="showCodeTopic('millis')">
+                        <h4>⏳ 4. O Segredo do millis()</h4>
+                        <p>Por que nunca usamos delay() e como o ESP32 faz várias coisas juntas.</p>
+                    </div>
+
+                    <div class="code-menu-btn" onclick="showCodeTopic('pwmwrite')">
+                        <h4>💡 5. Comando PWM</h4>
+                        <p>Como o comando ledcWrite aplica o valor de 0 a 255 no pino.</p>
+                    </div>
+                </div>
+
+                <!-- Área Central com o Código e Destaque -->
+                <div class="code-main-area">
+                    <div class="code-header-bar">
+                        <span id="codeFileLabel">📄 SectorController.cpp</span>
+                        <span>C++17 • ESP32 NodeMCU</span>
+                    </div>
+
+                    <div class="code-explanation-banner" id="codeExplanation">
+                        <!-- Preenchido via Javascript -->
+                    </div>
+
+                    <pre class="code-viewer" id="codeSnippetArea">
+                        <!-- Preenchido via Javascript -->
+                    </pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- SCRIPT DA APLICAÇÃO -->
+    <script>
+        // ====================================================================
+        // NAVEGAÇÃO DE ABAS
+        // ====================================================================
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.remove('active'));
+
+            if (tabId === 'sim3d') {
+                document.querySelector('.nav-links a:nth-child(1)').classList.add('active');
+                document.getElementById('sec-sim3d').classList.add('active');
+            } else if (tabId === 'circuito') {
+                document.querySelector('.nav-links a:nth-child(2)').classList.add('active');
+                document.getElementById('sec-circuito').classList.add('active');
+                resizeCanvases();
+            } else if (tabId === 'codigo') {
+                document.querySelector('.nav-links a:nth-child(3)').classList.add('active');
+                document.getElementById('sec-codigo').classList.add('active');
+            }
+        }
+
+        // ====================================================================
+        // SEÇÃO 1: MOTOR 3D COM THREE.JS
+        // ====================================================================
+        let scene, camera, renderer, controls;
+        let carGroup, carPos = -18;
+        let isDriving = true;
+        let isNight = true;
+        let dirLight, hemiLight;
+
+        // 4 Setores da Maquete
+        const SECTORS_DATA = [
+            { id: 0, xMin: -16, xMax: -8,  poleX: -12, lightA: null, lightB: null, curDuty: 35, targetDuty: 35, detected: false, holdTimer: 0 },
+            { id: 1, xMin: -8,  xMax: 0,   poleX: -4,  lightA: null, lightB: null, curDuty: 35, targetDuty: 35, detected: false, holdTimer: 0 },
+            { id: 2, xMin: 0,   xMax: 8,   poleX: 4,   lightA: null, lightB: null, curDuty: 35, targetDuty: 35, detected: false, holdTimer: 0 },
+            { id: 3, xMin: 8,   xMax: 16,  poleX: 12,  lightA: null, lightB: null, curDuty: 35, targetDuty: 35, detected: false, holdTimer: 0 }
+        ];
+
+        const sensorMeshes = [];
+        const lampBulbMeshes = [];
+
+        function init3D() {
+            const container = document.querySelector('.viewport-3d-wrapper');
+            const canvas = document.getElementById('canvas3d');
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x060913);
+            scene.fog = new THREE.FogExp2(0x060913, 0.025);
+
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 18, 28);
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2 - 0.05;
+            controls.target.set(0, 1, 0);
+
+            // Luzes de ambiente
+            hemiLight = new THREE.HemisphereLight(0x334466, 0x05070a, 0.3);
+            scene.add(hemiLight);
+
+            dirLight = new THREE.DirectionalLight(0x7799bb, 0.2);
+            dirLight.position.set(20, 40, 20);
+            scene.add(dirLight);
+
+            buildRoadway();
+            buildStreetlamps();
+            buildSensors();
+            buildCar();
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function buildRoadway() {
+            // Asfalto
+            const roadGeo = new THREE.PlaneGeometry(44, 8);
+            const roadMat = new THREE.MeshStandardMaterial({ color: 0x181c24, roughness: 0.8 });
+            const road = new THREE.Mesh(roadGeo, roadMat);
+            road.rotation.x = -Math.PI / 2;
+            road.receiveShadow = true;
+            scene.add(road);
+
+            // Calçadas laterais
+            const curbGeo = new THREE.BoxGeometry(44, 0.3, 1.2);
+            const curbMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+            
+            const curbNorth = new THREE.Mesh(curbGeo, curbMat);
+            curbNorth.position.set(0, 0.15, -4.6);
+            scene.add(curbNorth);
+
+            const curbSouth = new THREE.Mesh(curbGeo, curbMat);
+            curbSouth.position.set(0, 0.15, 4.6);
+            scene.add(curbSouth);
+
+            // Faixas brancas centrais (tracejadas)
+            for (let x = -19; x <= 19; x += 3.5) {
+                const stripeGeo = new THREE.PlaneGeometry(1.8, 0.2);
+                const stripeMat = new THREE.MeshBasicMaterial({ color: 0xe2e8f0 });
+                const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+                stripe.rotation.x = -Math.PI / 2;
+                stripe.position.set(x, 0.01, 0);
+                scene.add(stripe);
+            }
+
+            // Grama ao redor
+            const grassGeo = new THREE.PlaneGeometry(80, 50);
+            const grassMat = new THREE.MeshStandardMaterial({ color: 0x0a140d, roughness: 0.95 });
+            const grass = new THREE.Mesh(grassGeo, grassMat);
+            grass.rotation.x = -Math.PI / 2;
+            grass.position.y = -0.05;
+            scene.add(grass);
+        }
+
+        function buildStreetlamps() {
+            SECTORS_DATA.forEach(sec => {
+                // Cada setor tem 2 postes (um ao norte e outro ao sul da rua)
+                [-4.6, 4.6].forEach((zPos, idx) => {
+                    const postGroup = new THREE.Group();
+                    postGroup.position.set(sec.poleX, 0, zPos);
+
+                    // Poste vertical metálico
+                    const poleGeo = new THREE.CylinderGeometry(0.08, 0.12, 5.5, 16);
+                    const poleMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.3 });
+                    const pole = new THREE.Mesh(poleGeo, poleMat);
+                    pole.position.y = 2.75;
+                    postGroup.add(pole);
+
+                    // Braço curvo superior
+                    const armGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.6, 12);
+                    const arm = new THREE.Mesh(armGeo, poleMat);
+                    arm.rotation.z = (zPos > 0) ? 0 : 0;
+                    arm.rotation.x = (zPos > 0) ? -Math.PI / 3 : Math.PI / 3;
+                    arm.position.set(0, 5.2, (zPos > 0) ? -0.6 : 0.6);
+                    postGroup.add(arm);
+
+                    // Cúpula do poste
+                    const capGeo = new THREE.ConeGeometry(0.35, 0.3, 16);
+                    const capMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
+                    const cap = new THREE.Mesh(capGeo, capMat);
+                    cap.position.set(0, 5.7, (zPos > 0) ? -1.3 : 1.3);
+                    cap.rotation.x = Math.PI;
+                    postGroup.add(cap);
+
+                    // Lâmpada (Bulbo emissivo)
+                    const bulbGeo = new THREE.SphereGeometry(0.18, 16, 16);
+                    const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffe6aa });
+                    const bulb = new THREE.Mesh(bulbGeo, bulbMat);
+                    bulb.position.set(0, 5.55, (zPos > 0) ? -1.3 : 1.3);
+                    postGroup.add(bulb);
+                    lampBulbMeshes.push({ mesh: bulb, sectorId: sec.id });
+
+                    // Ponto de luz SpotLight simulando a iluminação real na rua
+                    const spot = new THREE.SpotLight(0xfff3d1, 0.4, 18, Math.PI / 3.5, 0.4, 1);
+                    spot.position.set(sec.poleX, 5.5, (zPos > 0) ? zPos - 1.3 : zPos + 1.3);
+                    spot.target.position.set(sec.poleX, 0, (zPos > 0) ? zPos - 2.5 : zPos + 2.5);
+                    scene.add(spot);
+                    scene.add(spot.target);
+
+                    if (idx === 0) sec.lightA = spot;
+                    else sec.lightB = spot;
+
+                    scene.add(postGroup);
+                });
+            });
+        }
+
+        function buildSensors() {
+            SECTORS_DATA.forEach(sec => {
+                // Módulo TCRT5000 embutido no asfalto com seus dois olhinhos IR
+                const boxGeo = new THREE.BoxGeometry(0.6, 0.1, 0.9);
+                const boxMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+                const sensorBox = new THREE.Mesh(boxGeo, boxMat);
+                sensorBox.position.set(sec.poleX, 0.05, 1.2);
+                scene.add(sensorBox);
+
+                // LED Emissor (Olho transparente) e Detector (Olho preto)
+                const eyeGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.15, 12);
+                const eyeEmitMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+                const eyeRecMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+
+                const eye1 = new THREE.Mesh(eyeGeo, eyeEmitMat);
+                eye1.position.set(sec.poleX - 0.15, 0.12, 1.2);
+                scene.add(eye1);
+
+                const eye2 = new THREE.Mesh(eyeGeo, eyeRecMat);
+                eye2.position.set(sec.poleX + 0.15, 0.12, 1.2);
+                scene.add(eye2);
+
+                // Feixe de luz infravermelha virtual (mostra quando detecta)
+                const beamGeo = new THREE.CylinderGeometry(0.02, 0.3, 1.8, 16, 1, true);
+                const beamMat = new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.0 });
+                const beam = new THREE.Mesh(beamGeo, beamMat);
+                beam.position.set(sec.poleX, 0.9, 1.2);
+                scene.add(beam);
+
+                sensorMeshes.push({ sectorId: sec.id, beamMat: beamMat });
+            });
+        }
+
+        function buildCar() {
+            carGroup = new THREE.Group();
+
+            // Chassi do carro de brinquedo
+            const bodyGeo = new THREE.BoxGeometry(2.4, 0.7, 1.2);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, metalness: 0.6, roughness: 0.3 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.position.y = 0.55;
+            carGroup.add(body);
+
+            // Cabine / Vidros
+            const cabinGeo = new THREE.BoxGeometry(1.3, 0.55, 1.0);
+            const cabinMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.1 });
+            const cabin = new THREE.Mesh(cabinGeo, cabinMat);
+            cabin.position.set(-0.2, 1.1, 0);
+            carGroup.add(cabin);
+
+            // Faróis dianteiros acesos
+            const lightGeo = new THREE.SphereGeometry(0.1, 8, 8);
+            const lightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const headL = new THREE.Mesh(lightGeo, lightMat);
+            headL.position.set(1.22, 0.55, 0.4);
+            const headR = new THREE.Mesh(lightGeo, lightMat);
+            headR.position.set(1.22, 0.55, -0.4);
+            carGroup.add(headL);
+            carGroup.add(headR);
+
+            // 4 Rodas
+            const wheelGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.2, 16);
+            const wheelMat = new THREE.MeshStandardMaterial({ color: 0x09090b });
+            const wheelsPos = [
+                [-0.7, 0.28, 0.6], [0.7, 0.28, 0.6],
+                [-0.7, 0.28, -0.6], [0.7, 0.28, -0.6]
+            ];
+            wheelsPos.forEach(pos => {
+                const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+                wheel.rotation.x = Math.PI / 2;
+                wheel.position.set(pos[0], pos[1], pos[2]);
+                carGroup.add(wheel);
+            });
+
+            carGroup.position.set(carPos, 0, 1.2);
+            scene.add(carGroup);
+        }
+
+        function onWindowResize() {
+            const container = document.querySelector('.viewport-3d-wrapper');
+            if (!container || !renderer) return;
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        // ====================================================================
+        // LOOP DE SIMULAÇÃO (COMPATÍVEL COM O CÓDIGO DO ESP32)
+        // ====================================================================
+        let lastTime = performance.now();
+
+        function animate(now) {
+            requestAnimationFrame(animate);
+            const dt = (now - lastTime) / 1000;
+            lastTime = now;
+
+            // Movimento do Carrinho
+            if (isDriving) {
+                carPos += 7.0 * dt;
+                if (carPos > 20) {
+                    carPos = -20; // Volta para o início da pista
+                }
+                carGroup.position.x = carPos;
+            }
+
+            // Atualização dos 4 Setores
+            let activeSectorCount = 0;
+
+            SECTORS_DATA.forEach(sec => {
+                // Checa se o carrinho está passando pelo sensor deste setor
+                const carNearSensor = Math.abs(carPos - sec.poleX) < 1.4;
+
+                if (carNearSensor) {
+                    sec.detected = true;
+                    sec.targetDuty = 255; // 100%
+                    sec.holdTimer = now;  // Renova os 2,5 segundos
+                    activeSectorCount++;
+                } else {
+                    sec.detected = false;
+                    // Regra dos 2,5s (2500 ms)
+                    if (now - sec.holdTimer < 2500) {
+                        sec.targetDuty = 255; // Mantém aceso
+                    } else {
+                        sec.targetDuty = 35;  // Modo Noturno Econômico (14%)
+                    }
+                }
+
+                // Efeito suave de transição (Fade In / Fade Out)
+                if (sec.curDuty < sec.targetDuty) {
+                    sec.curDuty = Math.min(sec.targetDuty, sec.curDuty + 350 * dt);
+                } else if (sec.curDuty > sec.targetDuty) {
+                    sec.curDuty = Math.max(sec.targetDuty, sec.curDuty - 140 * dt);
+                }
+
+                // Aplica a intensidade na luz do poste 3D
+                const intensityRatio = sec.curDuty / 255.0;
+                const lightPower = 0.2 + intensityRatio * 2.8;
+
+                if (sec.lightA) sec.lightA.intensity = lightPower;
+                if (sec.lightB) sec.lightB.intensity = lightPower;
+
+                // Atualiza feixe do sensor infravermelho
+                const sensorObj = sensorMeshes.find(s => s.sectorId === sec.id);
+                if (sensorObj) {
+                    sensorObj.beamMat.opacity = THREE.MathUtils.lerp(sensorObj.beamMat.opacity, sec.detected ? 0.75 : 0.0, 0.2);
+                }
+
+                // Atualiza a cor do bulbo da lâmpada
+                lampBulbMeshes.filter(b => b.sectorId === sec.id).forEach(b => {
+                    b.mesh.material.color.setRGB(1.0, 0.9 + 0.1 * intensityRatio, 0.4 + 0.6 * intensityRatio);
+                });
+
+                // Atualiza Sidebar do Setor
+                updateSectorUI(sec);
+            });
+
+            // Atualiza o crachá superior
+            const badge = document.getElementById('simBadge');
+            if (activeSectorCount > 0) {
+                badge.innerText = "🚗 VEÍCULO NA PISTA • ILUMINAÇÃO TOTAL NO SETOR ATIVO";
+                badge.style.color = "#fcd34d";
+            } else {
+                badge.innerText = "🌙 PISTA LIVRE • MODO NOTURNO (14% DE LUZ ECONOMIZANDO ENERGIA)";
+                badge.style.color = "var(--accent-cyan)";
+            }
+
+            // Atualiza relógio
+            const secTime = Math.floor(now / 1000);
+            const mins = String(Math.floor(secTime / 60)).padStart(2, '0');
+            const secs = String(secTime % 60).padStart(2, '0');
+            document.getElementById('liveClock').innerText = `${mins}:${secs}`;
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function updateSectorUI(sec) {
+            const card = document.getElementById(`card-sec-${sec.id}`);
+            const tag = document.getElementById(`tag-sec-${sec.id}`);
+            const meter = document.getElementById(`meter-sec-${sec.id}`);
+            const state = document.getElementById(`state-sec-${sec.id}`);
+            const pct = document.getElementById(`pct-sec-${sec.id}`);
+
+            const pctValue = Math.round((sec.curDuty / 255) * 100);
+            meter.style.width = `${pctValue}%`;
+            pct.innerText = `${pctValue}%`;
+
+            if (sec.detected) {
+                tag.innerText = "🚗 CARRO!";
+                tag.className = "sensor-tag detected";
+                state.innerText = "CARRO NA FRENTE";
+                card.classList.add('active-sector');
+            } else if (sec.targetDuty === 255) {
+                tag.innerText = "LIVRE";
+                tag.className = "sensor-tag";
+                state.innerText = "MANTENDO ACESO (2,5s)";
+                card.classList.add('active-sector');
+            } else if (sec.curDuty > 36) {
+                tag.innerText = "LIVRE";
+                tag.className = "sensor-tag";
+                state.innerText = "APAGANDO DEVAGAR";
+                card.classList.remove('active-sector');
+            } else {
+                tag.innerText = "LIVRE";
+                tag.className = "sensor-tag";
+                state.innerText = "MODO ECONOMICO";
+                card.classList.remove('active-sector');
+            }
+        }
+
+        function toggleDrive() {
+            isDriving = !isDriving;
+            const btn = document.getElementById('btnDrive');
+            btn.innerText = isDriving ? "⏸ Pausar Carrinho" : "▶ Iniciar Carrinho";
+            btn.classList.toggle('active', isDriving);
+        }
+
+        function resetCar() {
+            carPos = -19;
+            if (carGroup) carGroup.position.x = carPos;
+        }
+
+        function toggleNight() {
+            isNight = !isNight;
+            const btn = document.getElementById('btnNight');
+            btn.innerText = isNight ? "🌙 Modo Noite" : "☀️ Modo Dia";
+            
+            if (isNight) {
+                scene.background.setHex(0x060913);
+                scene.fog.color.setHex(0x060913);
+                hemiLight.intensity = 0.3;
+                dirLight.intensity = 0.2;
+            } else {
+                scene.background.setHex(0x87ceeb);
+                scene.fog.color.setHex(0x87ceeb);
+                hemiLight.intensity = 0.9;
+                dirLight.intensity = 0.8;
+            }
+        }
+
+        function resetCamera() {
+            camera.position.set(0, 18, 28);
+            controls.target.set(0, 1, 0);
+        }
+
+        // ====================================================================
+        // SEÇÃO 2: CANVAS 2D DO CIRCUITO E OSCILOSCÓPIO PWM
+        // ====================================================================
+        let currentPwmPct = 14;
+        let electronPhase = 0;
+
+        function initCircuits() {
+            renderCircuit();
+            renderPwmScope();
+        }
+
+        function resizeCanvases() {
+            const circCanvas = document.getElementById('circuitCanvas');
+            const pwmCanvas = document.getElementById('pwmCanvas');
+            if (!circCanvas || !pwmCanvas) return;
+
+            circCanvas.width = circCanvas.parentElement.clientWidth;
+            circCanvas.height = circCanvas.parentElement.clientHeight;
+            pwmCanvas.width = pwmCanvas.parentElement.clientWidth;
+            pwmCanvas.height = pwmCanvas.parentElement.clientHeight;
+        }
+
+        function renderCircuit() {
+            const canvas = document.getElementById('circuitCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Coordenadas do Circuito
+            const espX = 40, espY = 60, espW = 100, espH = 160;
+            const resX = 220, resY = 90;
+            const ledX = 340, ledY = 90;
+
+            // 1. Desenho do ESP32 NodeMCU
+            ctx.fillStyle = "#1e293b";
+            ctx.strokeStyle = "#00f2fe";
+            ctx.lineWidth = 2;
+            ctx.fillRect(espX, espY, espW, espH);
+            ctx.strokeRect(espX, espY, espW, espH);
+
+            // Etiqueta do ESP32
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 13px Plus Jakarta Sans";
+            ctx.fillText("ESP32", espX + 26, espY + 30);
+            ctx.fillStyle = "#94a3b8";
+            ctx.font = "11px Plus Jakarta Sans";
+            ctx.fillText("NodeMCU", espX + 22, espY + 48);
+
+            // Pino GPIO 25 (Saída PWM)
+            ctx.fillStyle = "#38bdf8";
+            ctx.fillText("GPIO 25 ●", espX + 35, espY + 85);
+
+            // Pino GND
+            ctx.fillStyle = "#94a3b8";
+            ctx.fillText("GND     ●", espX + 35, espY + 140);
+
+            // 2. Fio Superior (GPIO 25 -> Resistor -> LED)
+            ctx.beginPath();
+            ctx.strokeStyle = "#38bdf8";
+            ctx.lineWidth = 3;
+            ctx.moveTo(espX + espW, espY + 80);
+            ctx.lineTo(resX - 30, espY + 80);
+            ctx.stroke();
+
+            // Resistor 220Ω (Zigzag)
+            ctx.beginPath();
+            ctx.strokeStyle = "#fcd34d";
+            ctx.lineWidth = 3;
+            let rx = resX - 30;
+            ctx.moveTo(rx, espY + 80);
+            for (let i = 0; i < 6; i++) {
+                rx += 10;
+                ctx.lineTo(rx, (i % 2 === 0) ? espY + 70 : espY + 90);
+            }
+            rx += 10;
+            ctx.lineTo(rx, espY + 80);
+            ctx.stroke();
+
+            ctx.fillStyle = "#fcd34d";
+            ctx.font = "bold 11px Plus Jakarta Sans";
+            ctx.fillText("Resistor 220Ω", resX - 20, espY + 58);
+
+            // Fio Resistor -> LED
+            ctx.beginPath();
+            ctx.strokeStyle = "#38bdf8";
+            ctx.lineWidth = 3;
+            ctx.moveTo(rx, espY + 80);
+            ctx.lineTo(ledX, espY + 80);
+            ctx.stroke();
+
+            // Símbolo do LED
+            ctx.fillStyle = (currentPwmPct > 0) ? `rgba(255, 230, 150, ${0.3 + (currentPwmPct/100)*0.7})` : "#334155";
+            ctx.beginPath();
+            ctx.arc(ledX + 20, espY + 80, 16, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#fcd34d";
+            ctx.stroke();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 12px Plus Jakarta Sans";
+            ctx.fillText("💡 LED POSTE", ledX - 10, espY + 120);
+
+            // 3. Fio de Retorno (GND)
+            ctx.beginPath();
+            ctx.strokeStyle = "#64748b";
+            ctx.lineWidth = 3;
+            ctx.moveTo(ledX + 36, espY + 80);
+            ctx.lineTo(w - 40, espY + 80);
+            ctx.lineTo(w - 40, espY + 135);
+            ctx.lineTo(espX + espW, espY + 135);
+            ctx.stroke();
+
+            // 4. Animação dos Elétrons fluindo (Velocidade e densidade variam com o PWM)
+            if (currentPwmPct > 0) {
+                electronPhase += (currentPwmPct / 100) * 4;
+                ctx.fillStyle = "#00f2fe";
+
+                // Caminho dos elétrons
+                const points = [
+                    { x1: espX + espW, y1: espY + 80, x2: resX - 30, y2: espY + 80 },
+                    { x1: rx, y1: espY + 80, x2: ledX, y2: espY + 80 },
+                    { x1: ledX + 36, y1: espY + 80, x2: w - 40, y2: espY + 80 },
+                    { x1: w - 40, y1: espY + 80, x2: w - 40, y2: espY + 135 },
+                    { x1: w - 40, y1: espY + 135, x2: espX + espW, y2: espY + 135 }
+                ];
+
+                points.forEach(seg => {
+                    const dx = seg.x2 - seg.x1;
+                    const dy = seg.y2 - seg.y1;
+                    const dist = Math.hypot(dx, dy);
+                    const steps = Math.floor(dist / 22);
+
+                    for (let s = 0; s < steps; s++) {
+                        const progress = ((s * 22 + electronPhase) % dist) / dist;
+                        const px = seg.x1 + dx * progress;
+                        const py = seg.y1 + dy * progress;
+                        ctx.beginPath();
+                        ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+            }
+
+            requestAnimationFrame(renderCircuit);
+        }
+
+        let scopeOffset = 0;
+        function renderPwmScope() {
+            const canvas = document.getElementById('pwmCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Grade do Osciloscópio
+            ctx.strokeStyle = "#132035";
+            ctx.lineWidth = 1;
+            for (let x = 0; x < w; x += 30) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0); ctx.lineTo(x, h);
+                ctx.stroke();
+            }
+            for (let y = 0; y < h; y += 30) {
+                ctx.beginPath();
+                ctx.moveTo(0, y); ctx.lineTo(w, y);
+                ctx.stroke();
+            }
+
+            // Níveis 3.3V e 0V
+            const yHigh = 70;
+            const yLow = 190;
+
+            ctx.fillStyle = "#64748b";
+            ctx.font = "11px JetBrains Mono";
+            ctx.fillText("+3.3V (Ligado)", 15, yHigh - 8);
+            ctx.fillText(" 0.0V (Desligado)", 15, yLow + 18);
+
+            // Onda Quadrada PWM
+            scopeOffset += 3.5;
+            const period = 120; // Tamanho de um ciclo de onda no gráfico
+            const onTime = period * (currentPwmPct / 100);
+
+            ctx.beginPath();
+            ctx.strokeStyle = "#00f2fe";
+            ctx.lineWidth = 3;
+            ctx.shadowColor = "#00f2fe";
+            ctx.shadowBlur = 10;
+
+            let firstPoint = true;
+            for (let x = -period; x < w + period; x += 1) {
+                const phase = (x + scopeOffset) % period;
+                const y = (phase < onTime) ? yHigh : yLow;
+
+                if (firstPoint) {
+                    ctx.moveTo(x, y);
+                    firstPoint = false;
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0; // Desativa o glow para os textos
+
+            // Estatísticas no rodapé do osciloscópio
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 12px JetBrains Mono";
+            ctx.fillText(`Frequencia: 5.000 Hz   |   Periodo: 200 µs   |   Ligado: ${currentPwmPct}%   |   Desligado: ${100 - currentPwmPct}%`, 20, h - 18);
+
+            requestAnimationFrame(renderPwmScope);
+        }
+
+        function updatePwmDemo(val) {
+            currentPwmPct = parseInt(val);
+            const label = document.getElementById('pwmValueLabel');
+            if (currentPwmPct === 14) {
+                label.innerText = `14% (Brilho Noturno da Lua)`;
+            } else if (currentPwmPct === 100) {
+                label.innerText = `100% (Carro Detectado!)`;
+            } else {
+                label.innerText = `${currentPwmPct}%`;
+            }
+        }
+
+        function setPwmPreset(val) {
+            document.getElementById('pwmSlider').value = val;
+            updatePwmDemo(val);
+        }
+
+        // ====================================================================
+        // SEÇÃO 3: CÓDIGO E FUNÇÕES INTERATIVAS
+        // ====================================================================
+        const CODE_TOPICS = {
+            debounce: {
+                file: "SectorController.cpp",
+                title: "Como funciona o Filtro de Ruído (Software Debounce)?",
+                explanation: `<strong>🛡️ Problema:</strong> Na feira de ciências, lâmpadas do teto e sombras de pessoas passando podem enganar o sensor infravermelho.<br>
+                <strong>💡 A Solução no Código:</strong> O ESP32 só aceita que é um carro de verdade se a leitura ficar firme e estável por mais de <strong>30 milissegundos</strong> seguidos!`,
+                snippet: `<span class="code-comment">// Lê o sensor e remove ruídos ou piscadas da luz ambiente</span>
+<span class="code-type">void</span> <span class="code-func">ControladorSetor::filtrarLeituraSensor</span>(<span class="code-type">uint32_t</span> <span class="code-var">tempoAtualMs</span>) {
+    <span class="code-type">bool</span> <span class="code-var">leituraAgora</span> = <span class="code-func">digitalRead</span>(config.pinoSensor);
+
+    <span class="code-comment">// Se a leitura mudou, reiniciamos o cronômetro do filtro</span>
+    <span class="code-keyword">if</span> (<span class="code-var">leituraAgora</span> != leituraBrutaSensor) {
+        leituraBrutaSensor = <span class="code-var">leituraAgora</span>;
+        momentoFiltro = <span class="code-var">tempoAtualMs</span>;
+    }
+
+<span class="code-line-highlight">    <span class="code-comment">// Se ficou estável por 30ms, confirmamos que é um carro de verdade!</span>
+    <span class="code-keyword">if</span> ((<span class="code-var">tempoAtualMs</span> - momentoFiltro) >= <span class="code-var">TEMPO_FILTRO_RUIDO_MS</span>) {
+        leituraEstavelSensor = leituraBrutaSensor;
+    }</span>
+}`
+            },
+            regra25: {
+                file: "SectorController.cpp",
+                title: "Como funciona a Regra de Segurança dos 2,5 Segundos?",
+                explanation: `<strong>⏱️ Segurança no Trânsito:</strong> Se a luz apagasse no mesmo milissegundo em que o carro saísse do sensor, o motorista ficaria no escuro!<br>
+                <strong>💡 A Solução no Código:</strong> Guardamos o instante exato em que o carro passou. O poste só começa a apagar depois de <strong>2.500 milissegundos</strong>.`,
+                snippet: `<span class="code-comment">// Decide se o poste precisa ficar forte (carro) ou fraco (economia)</span>
+<span class="code-type">void</span> <span class="code-func">ControladorSetor::decidirBrilhoDesejado</span>(<span class="code-type">uint32_t</span> <span class="code-var">tempoAtualMs</span>) {
+    <span class="code-keyword">if</span> (<span class="code-func">temCarro</span>()) {
+<span class="code-line-highlight">        brilhoDesejado = <span class="code-var">BRILHO_MAXIMO</span>; <span class="code-comment">// 255 (100% de luz)</span>
+        momentoCarroSaiu = <span class="code-var">tempoAtualMs</span>; <span class="code-comment">// Guarda o momento da saída</span></span>
+    } <span class="code-keyword">else</span> {
+        <span class="code-comment">// Calcula quanto tempo se passou desde que o carro saiu</span>
+        <span class="code-type">uint32_t</span> <span class="code-var">tempoDesdeQuePassou</span> = <span class="code-var">tempoAtualMs</span> - momentoCarroSaiu;
+
+<span class="code-line-highlight">        <span class="code-keyword">if</span> (<span class="code-var">tempoDesdeQuePassou</span> < <span class="code-var">TEMPO_MANTER_ACESO_MS</span>) {
+            brilhoDesejado = <span class="code-var">BRILHO_MAXIMO</span>; <span class="code-comment">// Mantém 100% pelos 2,5s</span>
+        } <span class="code-keyword">else</span> {
+            brilhoDesejado = <span class="code-var">BRILHO_LUA</span>;     <span class="code-comment">// Volta aos 14% ecológicos</span>
+        }</span>
+    }
+}`
+            },
+            fade: {
+                file: "SectorController.cpp",
+                title: "Como funciona o Efeito Suave de Acender e Apagar (Fade)?",
+                explanation: `<strong>✨ Conforto Visual:</strong> Lâmpadas que acendem em um tranco repentino cegam o motorista.<br>
+                <strong>💡 A Solução no Código:</strong> A cada 15 milissegundos, aumentamos ou diminuímos apenas alguns passinhos do brilho, criando uma curva suave e bonita!`,
+                snippet: `<span class="code-comment">// Faz a transição de brilho acontecer devagar e com elegância</span>
+<span class="code-type">void</span> <span class="code-func">ControladorSetor::ajustarBrilhoSuave</span>(<span class="code-type">uint32_t</span> <span class="code-var">tempoAtualMs</span>) {
+    <span class="code-comment">// Só dá um passo de ajuste a cada 15 milissegundos</span>
+    <span class="code-keyword">if</span> ((<span class="code-var">tempoAtualMs</span> - momentoFade) < <span class="code-var">INTERVALO_EFEITO_MS</span>) <span class="code-keyword">return</span>;
+    momentoFade = <span class="code-var">tempoAtualMs</span>;
+
+<span class="code-line-highlight">    <span class="code-keyword">if</span> (brilhoAtual < brilhoDesejado) {
+        <span class="code-comment">// Clareia rápido (+8 por passo)</span>
+        brilhoAtual = <span class="code-func">min</span>((<span class="code-type">int</span>)brilhoDesejado, (<span class="code-type">int</span>)brilhoAtual + <span class="code-var">PASSO_ACENDER</span>);
+        <span class="code-func">enviarPwmParaLed</span>(brilhoAtual);
+    } <span class="code-keyword">else if</span> (brilhoAtual > brilhoDesejado) {
+        <span class="code-comment">// Escurece devagar e suave (-3 por passo)</span>
+        brilhoAtual = <span class="code-func">max</span>((<span class="code-type">int</span>)brilhoDesejado, (<span class="code-type">int</span>)brilhoAtual - <span class="code-var">PASSO_APAGAR</span>);
+        <span class="code-func">enviarPwmParaLed</span>(brilhoAtual);
+    }</span>
+}`
+            },
+            millis: {
+                file: "main.cpp",
+                title: "Por que usamos millis() e NUNCA delay()?",
+                explanation: `<strong>⏳ O Grande Erro do delay():</strong> O comando <code>delay()</code> congela todo o cérebro do ESP32. Se um carro passar no Setor 3 enquanto a placa está esperando um delay no Setor 1, o sensor perde o carro!<br>
+                <strong>💡 O Segredo do millis():</strong> A função <code>millis()</code> lê o cronômetro interno do ESP32 sem parar o código. Assim, todos os 4 setores rodam ao mesmo tempo!`,
+                snippet: `<span class="code-comment">// O loop principal nunca para e nunca congela o processador</span>
+<span class="code-type">void</span> <span class="code-func">loop</span>() {
+<span class="code-line-highlight">    <span class="code-comment">// Pegamos o relógio do ESP32 (milissegundos desde que foi ligado)</span>
+    <span class="code-keyword">const</span> <span class="code-type">uint32_t</span> <span class="code-var">tempoAtualMs</span> = <span class="code-func">millis</span>();</span>
+
+    <span class="code-comment">// Atualiza os 4 setores da pista de forma independente e simultânea</span>
+    <span class="code-keyword">for</span> (<span class="code-type">size_t</span> <span class="code-var">i</span> = 0; <span class="code-var">i</span> < <span class="code-var">TOTAL_SETORES</span>; ++<span class="code-var">i</span>) {
+        setores[<span class="code-var">i</span>].<span class="code-func">atualizar</span>(<span class="code-var">tempoAtualMs</span>);
+    }
+
+    <span class="code-comment">// Mostra os dados na tela do computador da feira</span>
+    <span class="code-func">imprimirStatusNaTela</span>(<span class="code-var">tempoAtualMs</span>);
+}`
+            },
+            pwmwrite: {
+                file: "SectorController.cpp",
+                title: "Como o comando ledcWrite comanda a potência?",
+                explanation: `<strong>💡 Controle do Hardware:</strong> A função <code>ledcWrite()</code> escreve um valor entre <strong>0</strong> (totalmente apagado) e <strong>255</strong> (100% aceso). O ESP32 gera a onda quadrada na frequência de 5.000 Hz automaticamente pelo chip!`,
+                snippet: `<span class="code-comment">// Envia o valor de brilho de 0 a 255 para o gerador de pulsos de hardware</span>
+<span class="code-type">void</span> <span class="code-func">ControladorSetor::enviarPwmParaLed</span>(<span class="code-type">uint8_t</span> <span class="code-var">brilho</span>) {
+<span class="code-line-highlight">#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
+    <span class="code-comment">// Versão moderna do Arduino ESP32</span>
+    <span class="code-func">ledcWrite</span>(config.pinoLed, <span class="code-var">brilho</span>);
+#else
+    <span class="code-comment">// Versão clássica do Arduino ESP32</span>
+    <span class="code-func">ledcWrite</span>(config.canalPwm, <span class="code-var">brilho</span>);
+#endif</span>
+}`
+            }
+        };
+
+        function showCodeTopic(topicKey) {
+            document.querySelectorAll('.code-menu-btn').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            const topic = CODE_TOPICS[topicKey];
+            document.getElementById('codeFileLabel').innerText = `📄 ${topic.file}`;
+            document.getElementById('codeExplanation').innerHTML = topic.explanation;
+            document.getElementById('codeSnippetArea').innerHTML = topic.snippet;
+        }
+
+        // ====================================================================
+        // INICIALIZAÇÃO GERAL
+        // ====================================================================
+        window.addEventListener('load', () => {
+            init3D();
+            animate(performance.now());
+            initCircuits();
+            resizeCanvases();
+            showCodeTopic('debounce');
+        });
+
+        window.addEventListener('resize', () => {
+            resizeCanvases();
+        });
+    </script>
+</body>
+</html>
