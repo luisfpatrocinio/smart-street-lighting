@@ -1,0 +1,174 @@
+/* SECTION 1: 3D SIMULATION */
+.sim-container {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.viewport-3d-wrapper {
+    position: relative;
+    width: 100%;
+    height: 580px;
+    background: #050810;
+}
+
+#canvas3d {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.sim-overlay-controls {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: rgba(17, 24, 39, 0.85);
+    backdrop-filter: blur(8px);
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    z-index: 10;
+}
+
+.sim-btn {
+    background: var(--bg-card-hover);
+    color: #fff;
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.sim-btn:hover {
+    background: var(--accent-cyan);
+    color: #000;
+    border-color: var(--accent-cyan);
+}
+
+.sim-btn.active {
+    background: var(--accent-blue);
+    color: #fff;
+}
+
+.sim-info-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: rgba(17, 24, 39, 0.85);
+    backdrop-filter: blur(8px);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--accent-cyan);
+    font-weight: 700;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* 3D Sidebar Telemetry */
+.sim-sidebar {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    background: #0d131f;
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+}
+
+.sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sector-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+
+.sector-card.active-sector {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.sector-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.sensor-tag {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    background: #26334d;
+    color: var(--text-muted);
+}
+
+.sensor-tag.detected {
+    background: var(--accent-red);
+    color: #fff;
+    animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+    from { opacity: 0.8; }
+    to { opacity: 1; filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8)); }
+}
+
+.sector-meter {
+    height: 8px;
+    background: #1e293b;
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 8px 0;
+}
+
+.sector-meter-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #fcd34d, #00f2fe);
+    width: 14%;
+    transition: width 0.1s linear;
+}
+
+.sector-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+@media (max-width: 1024px) {
+    .sim-container {
+        grid-template-columns: 1fr;
+    }
+    .viewport-3d-wrapper {
+        height: 420px;
+    }
+}

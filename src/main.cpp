@@ -1,14 +1,23 @@
+/**
+ * @file main.cpp
+ * @brief Programa principal do sistema de Iluminação Pública Inteligente.
+ * @project Iluminação Pública Inteligente (Smart City) — Feira de Robótica
+ * @target Microcontrolador ESP32 NodeMCU (WROOM-32)
+ * 
+ * Executa a inicialização de todos os setores e processa o loop de controle
+ * de forma contínua e 100% não-bloqueante, sem nenhuma chamada a delay().
+ */
+
 #include "Config.hpp"
 #include "SectorController.hpp"
 #include <Arduino.h>
 
-// ============================================================================
-// PROJETO DE ROBÓTICA: ILUMINAÇÃO INTELIGENTE PARA CIDADES DO FUTURO (SMART CITY)
-// Apresentação: Alunos do 6º ao 8º ano
-// Placa: ESP32 NodeMCU
-// ============================================================================
+using namespace SmartLighting;
 
-// Criamos a lista dos 4 setores da nossa maquete
+// ============================================================================
+// INSTANCIAÇÃO DOS SETORES DA MAQUETE
+// ============================================================================
+// Cria o arranjo contendo os controladores dos 4 setores da pista
 ControladorSetor setores[TOTAL_SETORES] = {
     ControladorSetor(LISTA_SETORES[0]),
     ControladorSetor(LISTA_SETORES[1]),
@@ -16,10 +25,12 @@ ControladorSetor setores[TOTAL_SETORES] = {
     ControladorSetor(LISTA_SETORES[3])
 };
 
-// Variável para controlar o tempo do envio de mensagens para o computador
+// Variável para controle da taxa de atualização do monitor serial
 uint32_t momentoUltimoRelatorio = 0;
 
-// Função que imprime um painel de boas-vindas no Monitor Serial
+/**
+ * @brief Imprime o cabeçalho descritivo com os dados de calibração do sistema.
+ */
 void imprimirPainelInicial() {
     Serial.println();
     Serial.println(F("===================================================================="));
@@ -30,20 +41,23 @@ void imprimirPainelInicial() {
     Serial.printf(" Brilho Noturno (Lua)  : %u (~14%% de energia consumida)\n", BRILHO_LUA);
     Serial.printf(" Brilho com Carro      : %u (100%% de potencia)\n", BRILHO_MAXIMO);
     Serial.printf(" Tempo Aceso na Saida  : %lu ms (2,5 segundos de seguranca)\n", static_cast<unsigned long>(TEMPO_MANTER_ACESO_MS));
+    Serial.printf(" Filtro de Ruido (IR)  : %lu ms (software debounce)\n", static_cast<unsigned long>(TEMPO_FILTRO_RUIDO_MS));
     Serial.println(F("--------------------------------------------------------------------"));
     Serial.println(F(" Mapeamento dos Pinos no ESP32:"));
     for (size_t i = 0; i < TOTAL_SETORES; ++i) {
         const auto& cfg = setores[i].obterConfig();
-        Serial.printf("  [Setor %u] Sensor Infravermelho: GPIO %2u  |  LEDs dos Postes: GPIO %2u\n",
-                      cfg.id, cfg.pinoSensor, cfg.pinoLed);
+        Serial.printf("  [Setor %u] Sensor Infravermelho: GPIO %2u  |  LEDs dos Postes: GPIO %2u  |  Canal PWM %u\n",
+                      cfg.id, cfg.pinoSensor, cfg.pinoLed, cfg.canalPwm);
     }
     Serial.println(F("===================================================================="));
     Serial.println(F(" SISTEMA LIGADO! PISTA MONITORADA EM TEMPO REAL...\n"));
 }
 
-// Função que envia o status de cada setor para a tela do computador
+/**
+ * @brief Transmite telemetria formatada a cada 500 ms para visualização no computador.
+ * @param tempoAtualMs Tempo atual em milissegundos retornado por millis().
+ */
 void imprimirStatusNaTela(uint32_t tempoAtualMs) {
-    // Só envia mensagem a cada meio segundo (500 ms) para não poluir a tela
     if ((tempoAtualMs - momentoUltimoRelatorio) < INTERVALO_MENSAGENS_MS) {
         return;
     }
@@ -52,13 +66,12 @@ void imprimirStatusNaTela(uint32_t tempoAtualMs) {
     Serial.printf("[%6lu s] ", static_cast<unsigned long>(tempoAtualMs / 1000));
 
     for (size_t i = 0; i < TOTAL_SETORES; ++i) {
-        bool temCarro = setores[i].temCarro();
+        bool carroDetectado = setores[i].temCarro();
         uint8_t porcentagem = setores[i].obterPorcentagemBrilho();
 
-        // Mostra o setor, se tem carrinho ou pista livre, e a porcentagem de luz
         Serial.printf("Setor %u:[%s|%3u%%|%s]   ",
                       setores[i].obterConfig().id,
-                      temCarro ? "🚗 CARRO" : "--- LIVRE",
+                      carroDetectado ? "🚗 CARRO" : "--- LIVRE",
                       porcentagem,
                       setores[i].obterNomeEstado());
     }
@@ -66,37 +79,34 @@ void imprimirStatusNaTela(uint32_t tempoAtualMs) {
 }
 
 // ============================================================================
-// SETUP: Roda apenas UMA VEZ quando o ESP32 é ligado na tomada ou USB
+// SETUP: Executado uma única vez ao ligar o ESP32
 // ============================================================================
 void setup() {
-    // Inicia a comunicação com o computador a 115200 bits por segundo
     Serial.begin(115200);
 
-    // Pequena pausa de meio segundo para estabilizar a porta USB
+    // Aguarda estabilização da porta de comunicação serial
     delay(500);
 
-    // Liga e prepara cada um dos 4 setores da maquete
+    // Inicializa cada um dos 4 setores da maquete
     for (size_t i = 0; i < TOTAL_SETORES; ++i) {
         setores[i].iniciar();
     }
 
-    // Mostra as informações do projeto no Monitor Serial do computador
     imprimirPainelInicial();
 }
 
 // ============================================================================
-// LOOP: Fica rodando SEM PARAR (milhares de vezes por segundo)
-// ATENÇÃO: Nunca usamos delay() aqui dentro para o sistema não travar!
+// LOOP: Executado continuamente milhares de vezes por segundo
 // ============================================================================
 void loop() {
-    // Pegamos o relógio interno do ESP32 (tempo desde que ligou)
+    // Amostra o relógio interno do microcontrolador
     const uint32_t tempoAtualMs = millis();
 
-    // Atualiza a lógica de cada um dos setores da pista
+    // Atualiza a máquina de estados e temporizadores de cada setor
     for (size_t i = 0; i < TOTAL_SETORES; ++i) {
         setores[i].atualizar(tempoAtualMs);
     }
 
-    // Mostra as leituras e gráficos de status no computador
+    // Emite os dados de monitoramento via Serial
     imprimirStatusNaTela(tempoAtualMs);
 }

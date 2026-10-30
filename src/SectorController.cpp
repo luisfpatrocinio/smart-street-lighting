@@ -1,7 +1,14 @@
+/**
+ * @file SectorController.cpp
+ * @brief Implementação dos métodos da classe ControladorSetor.
+ * @project Iluminação Pública Inteligente (Smart City) — Feira de Robótica
+ */
+
 #include "SectorController.hpp"
 #include <esp_arduino_version.h>
 
-// Construtor: inicia as variáveis com valores seguros ao ligar a placa
+namespace SmartLighting {
+
 ControladorSetor::ControladorSetor(const SetorPoste& configSetor)
     : config(configSetor),
       brilhoAtual(BRILHO_LUA),
@@ -14,47 +21,49 @@ ControladorSetor::ControladorSetor(const SetorPoste& configSetor)
 }
 
 void ControladorSetor::iniciar() {
-    // 1. Configura o pino do sensor como ENTRADA com resistor de puxar para cima (PULL-UP)
-    // Isso evita que o pino fique "flutuando" ou dando leituras malucas
+    // 1. Configura o pino do sensor como ENTRADA com pull-up interno ativo.
+    // O pull-up garante que o pino permaneça em 3.3V (HIGH) se o sensor estiver desconectado.
     pinMode(config.pinoSensor, INPUT_PULLUP);
 
-    // 2. Configura a saída PWM do ESP32 para o pino dos LEDs
+    // 2. Configura a saída PWM do ESP32 de acordo com a versão do framework Arduino
 #if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
+    // Arduino ESP32 Core 3.x: API moderna baseada no pino diretamente
     ledcAttach(config.pinoLed, FREQUENCIA_PWM_HZ, RESOLUCAO_PWM_BITS);
 #else
+    // Arduino ESP32 Core 2.x: API clássica baseada em canal de hardware (0-15)
     ledcSetup(config.canalPwm, FREQUENCIA_PWM_HZ, RESOLUCAO_PWM_BITS);
     ledcAttachPin(config.pinoLed, config.canalPwm);
 #endif
 
-    // 3. Acende o poste no modo noturno inicial (brilho suave)
+    // 3. Aplica o brilho noturno econômico inicial nos LEDs
     enviarPwmParaLed(brilhoAtual);
 
-    // 4. Faz a primeira leitura do sensor
+    // 4. Captura a primeira amostra do sensor para inicialização do filtro
     leituraBrutaSensor = digitalRead(config.pinoSensor);
     leituraEstavelSensor = leituraBrutaSensor;
 }
 
 void ControladorSetor::atualizar(uint32_t tempoAtualMs) {
-    // Passo 1: Lê o sensor e remove ruídos elétricos ou luz da sala
+    // Passo 1: Lê o sensor e remove ruídos transitórios ou oscilações da iluminação da sala
     filtrarLeituraSensor(tempoAtualMs);
 
-    // Passo 2: Decide se o poste precisa ficar forte (carro) ou fraco (economia)
+    // Passo 2: Avalia a presença do veículo e aplica a regra de segurança dos 2,5 segundos
     decidirBrilhoDesejado(tempoAtualMs);
 
-    // Passo 3: Faz a transição de brilho acontecer de forma suave, sem piscar
+    // Passo 3: Interpola o brilho atual suavemente em direção à meta (rampa de aceleração óptica)
     ajustarBrilhoSuave(tempoAtualMs);
 }
 
 void ControladorSetor::filtrarLeituraSensor(uint32_t tempoAtualMs) {
     bool leituraAgora = digitalRead(config.pinoSensor);
 
-    // Se o sensor mudou de valor, reiniciamos o cronômetro do filtro
+    // Se o estado instantâneo mudou, reinicia a contagem da janela de confirmação
     if (leituraAgora != leituraBrutaSensor) {
         leituraBrutaSensor = leituraAgora;
         momentoFiltro = tempoAtualMs;
     }
 
-    // Se o valor ficou parado por mais de 30 milissegundos, é um carro de verdade!
+    // Se a leitura permaneceu idêntica e contínua por mais de 30 ms, é uma detecção real!
     if ((tempoAtualMs - momentoFiltro) >= TEMPO_FILTRO_RUIDO_MS) {
         leituraEstavelSensor = leituraBrutaSensor;
     }
@@ -62,26 +71,25 @@ void ControladorSetor::filtrarLeituraSensor(uint32_t tempoAtualMs) {
 
 void ControladorSetor::decidirBrilhoDesejado(uint32_t tempoAtualMs) {
     if (temCarro()) {
-        // Situação A: Tem carrinho passando no setor!
+        // Situação A: O carrinho está ativamente sobre o sensor deste setor
         brilhoDesejado = BRILHO_MAXIMO;
-        momentoCarroSaiu = tempoAtualMs; // Guarda o momento para contar os 2,5 segundos depois
+        momentoCarroSaiu = tempoAtualMs; // Armazena a marcação de tempo para iniciar os 2,5s
     } else {
-        // Situação B: O carrinho já saiu da frente do sensor.
-        // Calculamos quanto tempo se passou desde a saída:
+        // Situação B: O carrinho já passou pelo sensor óptico
         uint32_t tempoDesdeQuePassou = tempoAtualMs - momentoCarroSaiu;
 
         if (tempoDesdeQuePassou < TEMPO_MANTER_ACESO_MS) {
-            // Ainda está nos 2,5 segundos de segurança: mantém luz total!
+            // Janela de retenção de 2,5 segundos: mantém 100% de luz para segurança do trânsito
             brilhoDesejado = BRILHO_MAXIMO;
         } else {
-            // Já passou o tempo de segurança: volta para a luz noturna econômica
+            // Tempo de retenção esgotado: comanda retorno suave ao modo noturno ecológico (14%)
             brilhoDesejado = BRILHO_LUA;
         }
     }
 }
 
 void ControladorSetor::ajustarBrilhoSuave(uint32_t tempoAtualMs) {
-    // Só damos um passinho de fade a cada 15 milissegundos (para o olho ver suave)
+    // Executa um passo da rampa óptica apenas a cada 15 milissegundos
     if ((tempoAtualMs - momentoFade) < INTERVALO_EFEITO_MS) {
         return;
     }
@@ -89,12 +97,12 @@ void ControladorSetor::ajustarBrilhoSuave(uint32_t tempoAtualMs) {
     momentoFade = tempoAtualMs;
 
     if (brilhoAtual < brilhoDesejado) {
-        // Aumenta o brilho aos pouquinhos (fade in rápido)
+        // Fade In: aumenta o brilho (+8 por ciclo) de forma rápida e segura
         uint16_t proximo = static_cast<uint16_t>(brilhoAtual) + PASSO_ACENDER;
         brilhoAtual = (proximo >= brilhoDesejado) ? brilhoDesejado : static_cast<uint8_t>(proximo);
         enviarPwmParaLed(brilhoAtual);
     } else if (brilhoAtual > brilhoDesejado) {
-        // Diminui o brilho aos pouquinhos (fade out suave e bonito)
+        // Fade Out: reduz o brilho (-3 por ciclo) de forma lenta e confortável para a visão
         int16_t proximo = static_cast<int16_t>(brilhoAtual) - PASSO_APAGAR;
         brilhoAtual = (proximo <= brilhoDesejado) ? brilhoDesejado : static_cast<uint8_t>(proximo);
         enviarPwmParaLed(brilhoAtual);
@@ -130,10 +138,12 @@ const char* ControladorSetor::obterNomeEstado() const {
         return "CARRO NA FRENTE";
     }
     if (brilhoDesejado == BRILHO_MAXIMO) {
-        return "MANTENDO ACESO";
+        return "MANTENDO ACESO (2.5s)";
     }
     if (brilhoAtual > BRILHO_LUA) {
         return "APAGANDO DEVAGAR";
     }
     return "MODO ECONOMICO";
 }
+
+} // namespace SmartLighting
