@@ -56,13 +56,10 @@ function renderBlueprint() {
     sensorOffsets.forEach((ratio, idx) => {
         const posX = marginX + boardW * ratio;
 
-        // Postes Norte e Sul (Círculos Amarelos com borda branca)
+        // Poste de Iluminação na Calçada (Círculo Amarelo com borda branca)
         ctx.fillStyle = "#fcd34d";
-        ctx.beginPath();
-        ctx.arc(posX, roadY - 14, 7, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.arc(posX, roadY + roadH + 18, 7, 0, Math.PI * 2);
         ctx.fill();

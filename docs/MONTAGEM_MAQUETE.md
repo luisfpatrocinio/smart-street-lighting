@@ -69,7 +69,7 @@ A pista possui **80 cm** de extensão dividida em **4 setores de 20 cm cada**.
 ---
 
 ### Etapa 2: Construindo os Postes com Canudo e LEDs
-Cada setor possui **2 postes** (um de cada lado da rua). Total = 8 postes.
+A maquete possui **4 postes no total** (1 poste por setor ao longo da calçada):
 
 1. **Solda ou Emenda dos Fios no LED:**
    - Pegue o LED branco (ou amarelo).
@@ -79,34 +79,29 @@ Cada setor possui **2 postes** (um de cada lado da rua). Total = 8 postes.
    - Isole com fita isolante para que uma perna não encoste na outra!
 2. **Passando o fio pelo canudo:**
    - Passe os dois fios por dentro do canudo plástico preto até o LED ficar no topo.
-   - Curve a ponta superior do canudo em formato de braço de poste ou cole a cúpula de papel sobre o LED.
-3. **Fixação na maquete:**
+   - Curve a ponta superior do canudo em formato de braço de poste ou cole a cúpula sobre o LED.
+3. **Fixação na calçada:**
    - Faça um furinho de 5 mm na calçada para passar os fios para baixo da base.
-   - Cole a base do canudo na maquete com uma gotinha de cola quente.
+   - Cole a base do canudo na calçada ao lado do sensor com uma gotinha de cola quente.
 
 ---
 
-### Etapa 3: Instalando os Sensores TCRT5000 no Chão
-1. O módulo TCRT5000 tem dois "olhinhos" na ponta: um **emissor transparente** (que solta luz infravermelha invisível) e um **receptor preto** (que lê o reflexo).
-2. Encaixe a plaquinha **por baixo da maquete**, de modo que apenas os dois olhinhos fiquem rentes ao chão da pista (apontando para cima).
-3. Cole a plaquinha por baixo com cola quente ou fita dupla-face reforçada.
-4. **Cuidado:** não passe cola em cima da lente dos olhinhos para não bloquear o feixe óptico!
+### Etapa 3: Instalando os Sensores TCRT5000 nas Calçadas
+1. O sensor TCRT5000 é fixado na **lateral da pista (calçada)**, deitado na horizontal.
+2. As duas lentes apontam diretamente para a **lateral/porta dos carrinhos** (a cerca de 5 a 10 mm do chão).
+3. Graças ao **INPUT_PULLUP** do ESP32, você só precisa de **2 fios no fototransistor**: pino de dados e GND.
+4. O sensor pode ser montado na base de cada poste ou em um pequeno totem de papelão.
 
 ---
 
 ### Etapa 4: Organização dos Fios Subterrâneos (Embaixo da Maquete)
-Para a maquete ficar limpa aos olhos dos juízes, todos os fios devem ficar **embaixo da base**:
+Para a maquete ficar limpa, todos os fios ficam **embaixo da base**:
 
-1. Use pequenos calços de papelão ou pezinhos de borracha de **3 a 4 cm de altura** nos 4 cantos da base para criar um "porão técnico".
-2. Fixe a protoboard e o ESP32 embaixo da maquete com fita dupla-face.
-3. Agrupe os fios de cada setor com pedacinhos de fita crepe:
-   - Setor 0: Fios laranjas (Sensor) e verdes (LEDs).
-   - Setor 1: Fios laranjas e amarelos.
-   - Setor 2: Fios laranjas e azuis.
-   - Setor 3: Fios laranjas e roxos.
-4. Conecte todos os terras (**GND**) no barramento azul da protoboard.
-5. Conecte todos os positivos dos sensores (**VCC**) no pino **3V3** do ESP32.
-6. Deixe o conector micro-USB do ESP32 acessível na lateral para plugar no computador ou em um carregador de celular (powerbank).
+1. Use pezinhos de borracha ou calços de **3 a 4 cm de altura** nos 4 cantos da base para criar o "porão técnico".
+2. Fixe a protoboard e o ESP32 embaixo da maquete.
+3. Conecte os 4 postes aos GPIOs 2, 4, 5 e 23 e os 4 sensores aos GPIOs 18, 19, 21 e 22.
+4. Conecte todos os terras (**GND**) no barramento comum da protoboard.
+5. Deixe o cabo USB do ESP32 acessível para ligar no computador ou powerbank.
 
 ---
 
@@ -114,9 +109,7 @@ Para a maquete ficar limpa aos olhos dos juízes, todos os fios devem ficar **em
 
 Antes de levar a maquete para a feira, execute este checklist:
 
-- [ ] **Teste de Continuidade:** Verifique se nenhuma perna de LED está dando curto com o terra.
-- [ ] **Teste de Iluminação:** Ao ligar o ESP32 na tomada USB, todos os 8 postes devem acender fraquinhos no **Modo Noturno (14%)**.
-- [ ] **Calibração do Sensor 0:** Passe a mão ou o carrinho sobre o furo 0. O poste 0A e 0B devem ir para 100% de brilho instantaneamente.
-- [ ] **Teste do Temporizador:** Afaste o carrinho. Conte no relógio: os postes devem permanecer 100% por 2,5 segundos e depois diminuir a luz suavemente.
-- [ ] **Repita o teste nos setores 1, 2 e 3.**
-- [ ] **Teste com Iluminação do Ambiente:** Acenda as luzes da sala e confira se nenhum poste acende sozinho (se acender falso alarme, regule o parafuso azul do sensor girando no sentido anti-horário).
+- [ ] **Teste de Iluminação:** Ao ligar o ESP32 na tomada USB, todos os 4 postes devem acender em **Modo Noturno (14%)**.
+- [ ] **Teste do Poste 1:** Passe o carrinho na frente do sensor 1. O Poste 1 deve ir para 100% de brilho instantaneamente.
+- [ ] **Teste do Temporizador:** Afaste o carrinho. O poste deve sustentar 100% por 2,5 segundos e dimerizar suavemente.
+- [ ] **Repita o teste nos Postes 2, 3 e 4.**

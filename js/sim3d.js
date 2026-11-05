@@ -35,10 +35,10 @@ const wireframeTranslucentMaterial = new THREE.MeshStandardMaterial({
 
 // Dados dos 4 Setores da Maquete (sincronizados com Config.hpp)
 const SECTORS_DATA = [
-    { id: 0, xMin: -16, xMax: -8,  poleX: -12, lightA: null, lightB: null, curDuty: 35, targetDuty: 35, detected: false, holdTimer: 0 },
-    { id: 1, xMin: -8,  xMax: 0,   poleX: -4,  lightA: null, lightB: null, curDuty: 35, targetDuty: 35, detected: false, holdTimer: 0 },
-    { id: 2, xMin: 0,   xMax: 8,   poleX: 4,   lightA: null, lightB: null, curDuty: 35, targetDuty: 35, detected: false, holdTimer: 0 },
-    { id: 3, xMin: 8,   xMax: 16,  poleX: 12,  lightA: null, lightB: null, curDuty: 35, targetDuty: 35, detected: false, holdTimer: 0 }
+    { id: 0, xMin: -16, xMax: -8,  poleX: -12, light: null, curDuty: 35, targetDuty: 35, detected: false, holdTimer: 0 },
+    { id: 1, xMin: -8,  xMax: 0,   poleX: -4,  light: null, curDuty: 35, targetDuty: 35, detected: false, holdTimer: 0 },
+    { id: 2, xMin: 0,   xMax: 8,   poleX: 4,   light: null, curDuty: 35, targetDuty: 35, detected: false, holdTimer: 0 },
+    { id: 3, xMin: 8,   xMax: 16,  poleX: 12,  light: null, curDuty: 35, targetDuty: 35, detected: false, holdTimer: 0 }
 ];
 
 function init3D() {
@@ -131,56 +131,53 @@ function buildRoadway() {
 
 function buildStreetlamps() {
     SECTORS_DATA.forEach(sec => {
-        // 2 postes por setor (um em cada calçada)
-        [-4.7, 4.7].forEach((zPos, idx) => {
-            const postGroup = new THREE.Group();
-            postGroup.position.set(sec.poleX, 0, zPos);
+        // 1 poste por setor ao longo da calçada (Total = 4 Postes)
+        const zPos = 4.7;
+        const postGroup = new THREE.Group();
+        postGroup.position.set(sec.poleX, 0, zPos);
 
-            // Coluna vertical do poste
-            const poleGeo = new THREE.CylinderGeometry(0.08, 0.12, 5.5, 16);
-            const poleMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.3 });
-            const pole = new THREE.Mesh(poleGeo, poleMat);
-            pole.position.y = 2.75;
-            registerScenery(pole, poleMat);
-            postGroup.add(pole);
+        // Coluna vertical do poste
+        const poleGeo = new THREE.CylinderGeometry(0.08, 0.12, 5.5, 16);
+        const poleMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.3 });
+        const pole = new THREE.Mesh(poleGeo, poleMat);
+        pole.position.y = 2.75;
+        registerScenery(pole, poleMat);
+        postGroup.add(pole);
 
-            // Braço curvo superior
-            const armGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.6, 12);
-            const arm = new THREE.Mesh(armGeo, poleMat);
-            arm.rotation.x = (zPos > 0) ? -Math.PI / 3 : Math.PI / 3;
-            arm.position.set(0, 5.2, (zPos > 0) ? -0.6 : 0.6);
-            registerScenery(arm, poleMat);
-            postGroup.add(arm);
+        // Braço curvo superior direcionado para a pista
+        const armGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.8, 12);
+        const arm = new THREE.Mesh(armGeo, poleMat);
+        arm.rotation.x = -Math.PI / 3;
+        arm.position.set(0, 5.2, -0.7);
+        registerScenery(arm, poleMat);
+        postGroup.add(arm);
 
-            // Cúpula do poste
-            const capGeo = new THREE.ConeGeometry(0.35, 0.3, 16);
-            const capMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
-            const cap = new THREE.Mesh(capGeo, capMat);
-            cap.position.set(0, 5.7, (zPos > 0) ? -1.3 : 1.3);
-            cap.rotation.x = Math.PI;
-            registerScenery(cap, capMat);
-            postGroup.add(cap);
+        // Cúpula do poste
+        const capGeo = new THREE.ConeGeometry(0.35, 0.3, 16);
+        const capMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
+        const cap = new THREE.Mesh(capGeo, capMat);
+        cap.position.set(0, 5.7, -1.4);
+        cap.rotation.x = Math.PI;
+        registerScenery(cap, capMat);
+        postGroup.add(cap);
 
-            // Bulbo emissivo (LED)
-            const bulbGeo = new THREE.SphereGeometry(0.18, 16, 16);
-            const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffe6aa });
-            const bulb = new THREE.Mesh(bulbGeo, bulbMat);
-            bulb.position.set(0, 5.55, (zPos > 0) ? -1.3 : 1.3);
-            postGroup.add(bulb);
-            lampBulbMeshes.push({ mesh: bulb, sectorId: sec.id });
+        // Bulbo emissivo (LED)
+        const bulbGeo = new THREE.SphereGeometry(0.18, 16, 16);
+        const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffe6aa });
+        const bulb = new THREE.Mesh(bulbGeo, bulbMat);
+        bulb.position.set(0, 5.55, -1.4);
+        postGroup.add(bulb);
+        lampBulbMeshes.push({ mesh: bulb, sectorId: sec.id });
 
-            // Ponto de luz SpotLight dinâmico iluminando o asfalto
-            const spot = new THREE.SpotLight(0xfff3d1, 0.4, 18, Math.PI / 3.5, 0.4, 1);
-            spot.position.set(sec.poleX, 5.5, (zPos > 0) ? zPos - 1.3 : zPos + 1.3);
-            spot.target.position.set(sec.poleX, 0, (zPos > 0) ? zPos - 2.5 : zPos + 2.5);
-            scene.add(spot);
-            scene.add(spot.target);
+        // Ponto de luz SpotLight dinâmico iluminando o asfalto
+        const spot = new THREE.SpotLight(0xfff3d1, 0.5, 20, Math.PI / 3.2, 0.4, 1);
+        spot.position.set(sec.poleX, 5.5, zPos - 1.4);
+        spot.target.position.set(sec.poleX, 0, 0); // Foco no centro da via
+        scene.add(spot);
+        scene.add(spot.target);
 
-            if (idx === 0) sec.lightA = spot;
-            else sec.lightB = spot;
-
-            scene.add(postGroup);
-        });
+        sec.light = spot;
+        scene.add(postGroup);
     });
 }
 
@@ -354,26 +351,15 @@ function buildWiring() {
         ], COLOR_SIG, 0x78350f);
         wiringGroup.add(wireSig);
 
-        // Cabo Verde (PWM dos Postes de Iluminação) subindo as colunas dos postes
-        // Poste Sul (Z = 4.7)
-        const wirePwmSouth = createWireTube([
+        // Cabo Verde (PWM) para o Poste de Iluminação
+        const wirePwm = createWireTube([
             new THREE.Vector3(0.0, 0.25, 6.0),
             new THREE.Vector3(0.0, 0.1, 5.0),
             new THREE.Vector3(sec.poleX, 0.1, 4.7),
             new THREE.Vector3(sec.poleX, 5.2, 4.7),
             new THREE.Vector3(sec.poleX, 5.5, 3.4)
         ], COLOR_PWM, 0x064e3b);
-        wiringGroup.add(wirePwmSouth);
-
-        // Conduíte cruzando por baixo do asfalto para o Poste Norte (Z = -4.7)
-        const wirePwmNorth = createWireTube([
-            new THREE.Vector3(sec.poleX, 0.05, 4.7),
-            new THREE.Vector3(sec.poleX, -0.15, 0.0), // Por baixo do asfalto
-            new THREE.Vector3(sec.poleX, 0.1, -4.7),
-            new THREE.Vector3(sec.poleX, 5.2, -4.7),
-            new THREE.Vector3(sec.poleX, 5.5, -3.4)
-        ], COLOR_PWM, 0x064e3b);
-        wiringGroup.add(wirePwmNorth);
+        wiringGroup.add(wirePwm);
 
         // Cabo Azul (GND Terra Comum) para os postes e sensores
         const wireGnd = createWireTube([
@@ -480,8 +466,7 @@ function animate3D(now) {
         const intensityRatio = sec.curDuty / 255.0;
         const lightPower = 0.2 + intensityRatio * 2.8;
 
-        if (sec.lightA) sec.lightA.intensity = lightPower;
-        if (sec.lightB) sec.lightB.intensity = lightPower;
+        if (sec.light) sec.light.intensity = lightPower;
 
         // Visualização do feixe horizontal infravermelho
         const sensorObj = sensorMeshes.find(s => s.sectorId === sec.id);

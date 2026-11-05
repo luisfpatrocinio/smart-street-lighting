@@ -19,18 +19,18 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <!-- Folhas de Estilo Modulares -->
-    <link rel="stylesheet" href="css/main.css?v=3">
-    <link rel="stylesheet" href="css/simulation3d.css?v=3">
-    <link rel="stylesheet" href="css/circuits.css?v=3">
-    <link rel="stylesheet" href="css/code-viewer.css?v=3">
-    <link rel="stylesheet" href="css/blueprint.css?v=3">
+    <link rel="stylesheet" href="css/main.css?v=4">
+    <link rel="stylesheet" href="css/simulation3d.css?v=4">
+    <link rel="stylesheet" href="css/circuits.css?v=4">
+    <link rel="stylesheet" href="css/code-viewer.css?v=4">
+    <link rel="stylesheet" href="css/blueprint.css?v=4">
 </head>
 <body>
 
     <!-- BARRA DE NAVEGAÇÃO SUPERIOR -->
     <nav>
         <div class="nav-brand">
-            <span>⚡ SMART CITY</span> — Iluminação Inteligente
+            <span>⚡ SMART CITY</span> — Iluminação Inteligente (4 Postes)
             <span class="badge-edu">Feira de Robótica</span>
         </div>
         <div class="nav-links">
@@ -54,7 +54,7 @@
         <section id="sec-sim3d" class="active">
             <div class="section-header">
                 <h2>🏙️ Maquete 3D Interativa</h2>
-                <p>Controle inteligente de iluminação por presença em 4 setores independentes.</p>
+                <p>Controle inteligente de iluminação por presença em 4 postes independentes.</p>
             </div>
 
             <div class="sim-container">
@@ -77,17 +77,17 @@
                     </div>
                 </div>
 
-                <!-- Painel de Telemetria Lateral dos 4 Setores -->
+                <!-- Painel de Telemetria Lateral dos 4 Postes -->
                 <div class="sim-sidebar">
                     <div class="sidebar-title">
-                        <span>Setores da Pista</span>
+                        <span>Status dos 4 Postes</span>
                         <span style="font-size: 0.8rem; color: var(--accent-cyan);" id="liveClock">00:00</span>
                     </div>
 
-                    <!-- Setor 0 -->
+                    <!-- Poste 1 -->
                     <div class="sector-card" id="card-sec-0">
                         <div class="sector-card-header">
-                            <span class="sector-name">Setor 0</span>
+                            <span class="sector-name">Poste 1</span>
                             <span class="sensor-tag" id="tag-sec-0">LIVRE</span>
                         </div>
                         <div class="sector-meter">
@@ -99,10 +99,10 @@
                         </div>
                     </div>
 
-                    <!-- Setor 1 -->
+                    <!-- Poste 2 -->
                     <div class="sector-card" id="card-sec-1">
                         <div class="sector-card-header">
-                            <span class="sector-name">Setor 1</span>
+                            <span class="sector-name">Poste 2</span>
                             <span class="sensor-tag" id="tag-sec-1">LIVRE</span>
                         </div>
                         <div class="sector-meter">
@@ -114,10 +114,10 @@
                         </div>
                     </div>
 
-                    <!-- Setor 2 -->
+                    <!-- Poste 3 -->
                     <div class="sector-card" id="card-sec-2">
                         <div class="sector-card-header">
-                            <span class="sector-name">Setor 2</span>
+                            <span class="sector-name">Poste 3</span>
                             <span class="sensor-tag" id="tag-sec-2">LIVRE</span>
                         </div>
                         <div class="sector-meter">
@@ -129,10 +129,10 @@
                         </div>
                     </div>
 
-                    <!-- Setor 3 -->
+                    <!-- Poste 4 -->
                     <div class="sector-card" id="card-sec-3">
                         <div class="sector-card-header">
-                            <span class="sector-name">Setor 3</span>
+                            <span class="sector-name">Poste 4</span>
                             <span class="sensor-tag" id="tag-sec-3">LIVRE</span>
                         </div>
                         <div class="sector-meter">
@@ -291,11 +291,11 @@
 
                         <div class="step-accordion" onclick="toggleStep(1)">
                             <div class="step-header">
-                                <span>Etapa 2: Postes de Iluminação</span>
-                                <span class="step-badge">8 Postes</span>
+                                <span>Etapa 2: Fabricação dos 4 Postes</span>
+                                <span class="step-badge">4 Postes</span>
                             </div>
                             <div class="step-body">
-                                1. Canudos ou tubos rígidos pretos com 10 a 12 cm de altura.<br>
+                                1. 4 canudos ou tubos rígidos pretos com 10 a 12 cm de altura.<br>
                                 2. LED no topo com resistor de 220Ω no terminal positivo (+).<br>
                                 3. Terminal negativo (-) ligado ao barramento comum de terra (GND).<br>
                                 4. Fiação conduzida internamente até a base inferior da maquete.
@@ -305,11 +305,11 @@
                         <div class="step-accordion" onclick="toggleStep(2)">
                             <div class="step-header">
                                 <span>Etapa 3: Sensores TCRT5000 nas Calçadas</span>
-                                <span class="step-badge">Totem Lateral</span>
+                                <span class="step-badge">4 Sensores</span>
                             </div>
                             <div class="step-body">
-                                1. Sensores montados horizontalmente na lateral da pista, alinhados à porta do carrinho.<br>
-                                2. Altura de 5 a 10 mm do chão para foco direto no veículo.<br>
+                                1. 4 sensores montados horizontalmente na calçada ao lado de cada poste.<br>
+                                2. Altura de 5 a 10 mm do chão para foco direto na lateral do veículo.<br>
                                 3. Apenas 2 fios no fototransistor: pino GPIO (com INPUT_PULLUP) e GND.<br>
                                 4. Acabamento embutido na base do poste ou em totem de radar.
                             </div>
@@ -322,7 +322,7 @@
                             </div>
                             <div class="step-body">
                                 1. Elevar a base com pezinhos de 4 cm para acomodar o ESP32 e fios embaixo da pista.<br>
-                                2. Conectar os setores aos respectivos pinos do ESP32.<br>
+                                2. Conectar os 4 postes aos GPIOs 2, 4, 5 e 23 e os 4 sensores aos GPIOs 18, 19, 21 e 22.<br>
                                 3. Testar a resposta imediata de 100% de brilho ao passar o veículo.
                             </div>
                         </div>
@@ -336,22 +336,22 @@
 
                     <label class="checklist-item" onclick="toggleCheckItem(this)">
                         <input type="checkbox">
-                        <span>Postes acendem em modo econômico (14%) ao energizar o circuito</span>
+                        <span>Todos os 4 postes acendem em modo econômico (14%) ao energizar</span>
                     </label>
 
                     <label class="checklist-item" onclick="toggleCheckItem(this)">
                         <input type="checkbox">
-                        <span>Cada sensor aciona seu respectivo setor ao passar o veículo</span>
+                        <span>Cada sensor aciona seu respectivo poste ao passar o veículo</span>
                     </label>
 
                     <label class="checklist-item" onclick="toggleCheckItem(this)">
                         <input type="checkbox">
-                        <span>Brilho sustenta 100% por 2,5s antes da dimerização</span>
+                        <span>Brilho sustenta 100% por 2,5s antes da dimerização suave</span>
                     </label>
 
                     <label class="checklist-item" onclick="toggleCheckItem(this)">
                         <input type="checkbox">
-                        <span>Todos os 4 setores operam de forma independente</span>
+                        <span>Todos os 4 postes operam de forma independente</span>
                     </label>
 
                     <label class="checklist-item" onclick="toggleCheckItem(this)">
@@ -361,7 +361,7 @@
 
                     <label class="checklist-item" onclick="toggleCheckItem(this)">
                         <input type="checkbox">
-                        <span>Alimentação USB estável conectada</span>
+                        <span>Alimentação USB estável conectada ao ESP32</span>
                     </label>
                 </div>
             </div>
@@ -369,10 +369,10 @@
     </main>
 
     <!-- Scripts da Aplicação (Carregados Modularmente com Cache-Busting) -->
-    <script src="js/sim3d.js?v=3"></script>
-    <script src="js/circuits.js?v=3"></script>
-    <script src="js/codeViewer.js?v=3"></script>
-    <script src="js/blueprint.js?v=3"></script>
-    <script src="js/app.js?v=3"></script>
+    <script src="js/sim3d.js?v=4"></script>
+    <script src="js/circuits.js?v=4"></script>
+    <script src="js/codeViewer.js?v=4"></script>
+    <script src="js/blueprint.js?v=4"></script>
+    <script src="js/app.js?v=4"></script>
 </body>
 </html>
