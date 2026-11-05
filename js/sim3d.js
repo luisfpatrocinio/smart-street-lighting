@@ -526,19 +526,19 @@ function updateSectorTelemetryUI(sec) {
     pct.innerText = `${pctValue}%`;
 
     if (sec.detected) {
-        tag.innerText = "🚗 DETECTADO";
+        tag.innerText = "CARRO";
         tag.className = "sensor-tag detected";
-        state.innerText = "CARRO NA FRENTE";
+        state.innerText = "CARRO DETECTADO";
         card.classList.add('active-sector');
     } else if (sec.targetDuty === 255) {
         tag.innerText = "LIVRE";
         tag.className = "sensor-tag";
-        state.innerText = "MANTENDO ACESO (2,5s)";
+        state.innerText = "TEMPO EXTRA (2,5s)";
         card.classList.add('active-sector');
     } else if (sec.curDuty > 36) {
         tag.innerText = "LIVRE";
         tag.className = "sensor-tag";
-        state.innerText = "APAGANDO DEVAGAR";
+        state.innerText = "DIMERIZANDO";
         card.classList.remove('active-sector');
     } else {
         tag.innerText = "LIVRE";
