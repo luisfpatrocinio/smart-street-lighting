@@ -124,9 +124,14 @@
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: 10px 12px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    padding: 10px 14px;
+    height: 78px;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .sector-card.active-sector {
@@ -138,24 +143,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
+    line-height: 1;
     white-space: nowrap;
 }
 
 .sector-name {
-    font-size: 0.88rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: #fff;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.sector-sub {
-    font-size: 0.75rem;
-    font-weight: 400;
-    color: var(--text-muted);
 }
 
 .sensor-tag {
@@ -163,7 +159,7 @@
     padding: 2px 8px;
     border-radius: 6px;
     font-weight: 700;
-    background: #26334d;
+    background: #1e293b;
     color: var(--text-muted);
     min-width: 62px;
     text-align: center;
@@ -171,7 +167,6 @@
     align-items: center;
     justify-content: center;
     white-space: nowrap;
-    flex-shrink: 0;
     letter-spacing: 0.5px;
     transition: background 0.2s ease, color 0.2s ease;
 }
@@ -188,11 +183,11 @@
 }
 
 .sector-meter {
-    height: 8px;
+    height: 6px;
     background: #1e293b;
     border-radius: 999px;
     overflow: hidden;
-    margin: 8px 0;
+    margin: 4px 0;
 }
 
 .sector-meter-fill {
@@ -206,10 +201,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     color: var(--text-muted);
     white-space: nowrap;
-    gap: 8px;
+    line-height: 1;
+}
+
+.sector-pct {
+    font-weight: 700;
+    color: var(--accent-cyan);
 }
 
 @media (max-width: 1024px) {

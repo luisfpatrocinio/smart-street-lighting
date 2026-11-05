@@ -516,10 +516,9 @@ function updateSectorTelemetryUI(sec) {
     const card = document.getElementById(`card-sec-${sec.id}`);
     const tag = document.getElementById(`tag-sec-${sec.id}`);
     const meter = document.getElementById(`meter-sec-${sec.id}`);
-    const state = document.getElementById(`state-sec-${sec.id}`);
     const pct = document.getElementById(`pct-sec-${sec.id}`);
 
-    if (!card || !tag || !meter || !state || !pct) return;
+    if (!card || !tag || !meter || !pct) return;
 
     const pctValue = Math.round((sec.curDuty / 255) * 100);
     meter.style.width = `${pctValue}%`;
@@ -528,23 +527,15 @@ function updateSectorTelemetryUI(sec) {
     if (sec.detected) {
         tag.innerText = "CARRO";
         tag.className = "sensor-tag detected";
-        state.innerText = "CARRO DETECTADO";
         card.classList.add('active-sector');
-    } else if (sec.targetDuty === 255) {
-        tag.innerText = "LIVRE";
-        tag.className = "sensor-tag";
-        state.innerText = "TEMPO EXTRA (2,5s)";
-        card.classList.add('active-sector');
-    } else if (sec.curDuty > 36) {
-        tag.innerText = "LIVRE";
-        tag.className = "sensor-tag";
-        state.innerText = "DIMERIZANDO";
-        card.classList.remove('active-sector');
     } else {
         tag.innerText = "LIVRE";
         tag.className = "sensor-tag";
-        state.innerText = "MODO ECONOMICO";
-        card.classList.remove('active-sector');
+        if (sec.targetDuty === 255) {
+            card.classList.add('active-sector');
+        } else {
+            card.classList.remove('active-sector');
+        }
     }
 }
 

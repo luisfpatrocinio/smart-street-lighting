@@ -19,11 +19,11 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
     <!-- Folhas de Estilo Modulares -->
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/simulation3d.css">
-    <link rel="stylesheet" href="css/circuits.css">
-    <link rel="stylesheet" href="css/code-viewer.css">
-    <link rel="stylesheet" href="css/blueprint.css">
+    <link rel="stylesheet" href="css/main.css?v=3">
+    <link rel="stylesheet" href="css/simulation3d.css?v=3">
+    <link rel="stylesheet" href="css/circuits.css?v=3">
+    <link rel="stylesheet" href="css/code-viewer.css?v=3">
+    <link rel="stylesheet" href="css/blueprint.css?v=3">
 </head>
 <body>
 
@@ -31,13 +31,13 @@
     <nav>
         <div class="nav-brand">
             <span>⚡ SMART CITY</span> — Iluminação Inteligente
-            <span class="badge-edu">Feira de Robótica 6º-8º Ano</span>
+            <span class="badge-edu">Feira de Robótica</span>
         </div>
         <div class="nav-links">
-            <a class="nav-link active" data-tab="sim3d" onclick="switchTab('sim3d')">🏙️ 1. Maquete 3D</a>
-            <a class="nav-link" data-tab="circuito" onclick="switchTab('circuito')">⚡ 2. Eletricidade & PWM</a>
-            <a class="nav-link" data-tab="codigo" onclick="switchTab('codigo')">💻 3. Código Explicado</a>
-            <a class="nav-link" data-tab="montagem" onclick="switchTab('montagem')">🛠️ 4. Guia de Montagem</a>
+            <a class="nav-link active" data-tab="sim3d" onclick="switchTab('sim3d')">🏙️ Maquete 3D</a>
+            <a class="nav-link" data-tab="circuito" onclick="switchTab('circuito')">⚡ Circuito & PWM</a>
+            <a class="nav-link" data-tab="codigo" onclick="switchTab('codigo')">💻 Código</a>
+            <a class="nav-link" data-tab="montagem" onclick="switchTab('montagem')">🛠️ Montagem</a>
         </div>
         <a href="https://github.com/luisfpatrocinio/smart-street-lighting" target="_blank" rel="noopener noreferrer" class="nav-github-link">
             <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor">
@@ -53,8 +53,8 @@
         <!-- ================================================================= -->
         <section id="sec-sim3d" class="active">
             <div class="section-header">
-                <h2>🏙️ Projeto Funcionando na Prática (Simulação 3D)</h2>
-                <p>Veja os 4 setores da pista em tempo real. Passe com o carrinho pelos sensores infravermelhos e observe os postes acendendo e apagando suavemente!</p>
+                <h2>🏙️ Maquete 3D Interativa</h2>
+                <p>Controle inteligente de iluminação por presença em 4 setores independentes.</p>
             </div>
 
             <div class="sim-container">
@@ -71,81 +71,81 @@
                     
                     <div class="sim-overlay-controls">
                         <button class="sim-btn" onclick="toggleDrive()" id="btnDrive">▶ Iniciar Carrinho</button>
-                        <button class="sim-btn" onclick="resetCar()">⏪ Reiniciar Posição</button>
+                        <button class="sim-btn" onclick="resetCar()">⏪ Reiniciar</button>
                         <button class="sim-btn" onclick="toggleWireView()" id="btnWireView">🔌 Ver Fiação 3D</button>
-                        <button class="sim-btn" onclick="resetCamera()">🎥 Redefinir Câmera</button>
+                        <button class="sim-btn" onclick="resetCamera()">🎥 Câmera</button>
                     </div>
                 </div>
 
                 <!-- Painel de Telemetria Lateral dos 4 Setores -->
                 <div class="sim-sidebar">
                     <div class="sidebar-title">
-                        <span>Status dos 4 Setores</span>
+                        <span>Setores da Pista</span>
                         <span style="font-size: 0.8rem; color: var(--accent-cyan);" id="liveClock">00:00</span>
                     </div>
 
                     <!-- Setor 0 -->
                     <div class="sector-card" id="card-sec-0">
                         <div class="sector-card-header">
-                            <span class="sector-name">Setor 0 <span class="sector-sub">(Postes 0A/0B)</span></span>
+                            <span class="sector-name">Setor 0</span>
                             <span class="sensor-tag" id="tag-sec-0">LIVRE</span>
                         </div>
                         <div class="sector-meter">
                             <div class="sector-meter-fill" id="meter-sec-0"></div>
                         </div>
                         <div class="sector-meta">
-                            <span id="state-sec-0">MODO ECONOMICO</span>
-                            <span id="pct-sec-0">14%</span>
+                            <span>Brilho</span>
+                            <span class="sector-pct" id="pct-sec-0">14%</span>
                         </div>
                     </div>
 
                     <!-- Setor 1 -->
                     <div class="sector-card" id="card-sec-1">
                         <div class="sector-card-header">
-                            <span class="sector-name">Setor 1 <span class="sector-sub">(Postes 1A/1B)</span></span>
+                            <span class="sector-name">Setor 1</span>
                             <span class="sensor-tag" id="tag-sec-1">LIVRE</span>
                         </div>
                         <div class="sector-meter">
                             <div class="sector-meter-fill" id="meter-sec-1"></div>
                         </div>
                         <div class="sector-meta">
-                            <span id="state-sec-1">MODO ECONOMICO</span>
-                            <span id="pct-sec-1">14%</span>
+                            <span>Brilho</span>
+                            <span class="sector-pct" id="pct-sec-1">14%</span>
                         </div>
                     </div>
 
                     <!-- Setor 2 -->
                     <div class="sector-card" id="card-sec-2">
                         <div class="sector-card-header">
-                            <span class="sector-name">Setor 2 <span class="sector-sub">(Postes 2A/2B)</span></span>
+                            <span class="sector-name">Setor 2</span>
                             <span class="sensor-tag" id="tag-sec-2">LIVRE</span>
                         </div>
                         <div class="sector-meter">
                             <div class="sector-meter-fill" id="meter-sec-2"></div>
                         </div>
                         <div class="sector-meta">
-                            <span id="state-sec-2">MODO ECONOMICO</span>
-                            <span id="pct-sec-2">14%</span>
+                            <span>Brilho</span>
+                            <span class="sector-pct" id="pct-sec-2">14%</span>
                         </div>
                     </div>
 
                     <!-- Setor 3 -->
                     <div class="sector-card" id="card-sec-3">
                         <div class="sector-card-header">
-                            <span class="sector-name">Setor 3 <span class="sector-sub">(Postes 3A/3B)</span></span>
+                            <span class="sector-name">Setor 3</span>
                             <span class="sensor-tag" id="tag-sec-3">LIVRE</span>
                         </div>
                         <div class="sector-meter">
                             <div class="sector-meter-fill" id="meter-sec-3"></div>
                         </div>
                         <div class="sector-meta">
-                            <span id="state-sec-3">MODO ECONOMICO</span>
-                            <span id="pct-sec-3">14%</span>
+                            <span>Brilho</span>
+                            <span class="sector-pct" id="pct-sec-3">14%</span>
                         </div>
                     </div>
 
                     <div style="font-size: 0.8rem; color: var(--text-muted); background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
-                        💡 <strong>Para mostrar aos juízes:</strong> Você pode clicar com o mouse e arrastar a maquete 3D para olhar de qualquer ângulo!
+                        💡 <strong>Dica:</strong> Clique e arraste para girar a maquete 3D.
                     </div>
                 </div>
             </div>
@@ -156,35 +156,34 @@
         <!-- ================================================================= -->
         <section id="sec-circuito">
             <div class="section-header">
-                <h2>⚡ Destaque para a Corrente Elétrica & PWM</h2>
-                <p>Como o ESP32 consegue controlar o brilho dos postes sem queimar os LEDs e sem esquentar? Veja os elétrons correndo no fio!</p>
+                <h2>⚡ Circuito Elétrico & PWM</h2>
+                <p>Controle de potência e proteção dos componentes pelo ESP32.</p>
             </div>
 
             <div class="circ-grid">
                 <!-- Card 1: Circuito Elétrico Animado -->
                 <div class="circ-card">
-                    <h3>🔋 Fluxo de Corrente no Circuito do Poste</h3>
+                    <h3>🔋 Circuito do Poste</h3>
                     <div class="circ-canvas-wrap">
                         <canvas id="circuitCanvas"></canvas>
                     </div>
 
                     <div class="explanation-box">
-                        <strong>🔵 O que está acontecendo aqui?</strong><br>
-                        Os pontos azuis são os <strong>elétrons</strong> fluindo pelo fio! O ESP32 envia 3.3V pelo pino GPIO. A corrente passa pelo <strong>resistor de 220Ω</strong> (que limita a corrente para proteger o LED) e faz o LED brilhar!
+                        <strong>Proteção do LED:</strong> O resistor de 220Ω limita a corrente fornecida pelo ESP32 (3.3V), evitando sobrecorrente e garantindo durabilidade ao LED.
                     </div>
                 </div>
 
                 <!-- Card 2: Osciloscópio PWM -->
                 <div class="circ-card">
-                    <h3>🌊 O que o ESP32 Realmente Faz: Sinal PWM (5.000 Hz)</h3>
+                    <h3>🌊 Sinal PWM (5.000 Hz)</h3>
                     <div class="circ-canvas-wrap">
                         <canvas id="pwmCanvas"></canvas>
                     </div>
 
                     <div class="control-group">
                         <div class="control-label">
-                            <span>Potência Desejada (Duty Cycle):</span>
-                            <span id="pwmValueLabel" style="color: var(--accent-cyan); font-weight: 700;">14% (Brilho Noturno da Lua)</span>
+                            <span>Potência (Duty Cycle):</span>
+                            <span id="pwmValueLabel" style="color: var(--accent-cyan); font-weight: 700;">14% (Econômico)</span>
                         </div>
                         <input type="range" min="0" max="100" value="14" class="slider" id="pwmSlider" oninput="updatePwmDemo(this.value)">
                     </div>
@@ -197,8 +196,7 @@
                     </div>
 
                     <div class="explanation-box">
-                        <strong>💡 O Segredo do PWM (Pulsos Rápidos):</strong><br>
-                        O ESP32 não diminui a voltagem de verdade! Ele liga e desliga o pino <strong>5.000 vezes por segundo</strong>. Quando queremos 14% de luz, ele fica ligado apenas 14% do tempo e desligado 86% do tempo. Como é rápido demais, o nosso olho enxerga apenas uma luz suave!
+                        <strong>Modulação por Largura de Pulso:</strong> O ESP32 pulsa o sinal 5.000 vezes por segundo. Em 14%, o LED permanece desligado na maior parte do tempo, gerando economia energética imediata sem cintilação perceptível.
                     </div>
                 </div>
             </div>
@@ -209,8 +207,8 @@
         <!-- ================================================================= -->
         <section id="sec-codigo">
             <div class="section-header">
-                <h2>💻 O Código por Dentro e Suas Principais Funções</h2>
-                <p>Clique nas funções abaixo para entender como cada linha de programação comanda os postes e os sensores na maquete.</p>
+                <h2>💻 Lógica de Programação</h2>
+                <p>Algoritmos implementados no ESP32 para controle dos sensores e postes.</p>
             </div>
 
             <div class="code-grid">
@@ -218,27 +216,27 @@
                 <div class="code-sidebar">
                     <div class="code-menu-btn active" data-topic="debounce" onclick="showCodeTopic('debounce', this)">
                         <h4>🛡️ 1. Filtro de Ruído</h4>
-                        <p>Evita que a luz da sala dê falsos alarmes no sensor de infravermelho.</p>
+                        <p>Elimina falsos disparos causados pela luz ambiente.</p>
                     </div>
 
                     <div class="code-menu-btn" data-topic="regra25" onclick="showCodeTopic('regra25', this)">
-                        <h4>⏱️ 2. Regra dos 2,5s</h4>
-                        <p>Mantém a luz 100% acesa para o carrinho passar com segurança.</p>
+                        <h4>⏱️ 2. Temporizador (2,5s)</h4>
+                        <p>Sustenta o setor aceso até o veículo concluir o trecho.</p>
                     </div>
 
                     <div class="code-menu-btn" data-topic="fade" onclick="showCodeTopic('fade', this)">
-                        <h4>✨ 3. Transição Suave (Fade)</h4>
-                        <p>Ajusta o brilho aos pouquinhos para não assustar o motorista.</p>
+                        <h4>✨ 3. Transição Suave</h4>
+                        <p>Ajuste gradual de brilho sem oscilações bruscas.</p>
                     </div>
 
                     <div class="code-menu-btn" data-topic="millis" onclick="showCodeTopic('millis', this)">
-                        <h4>⏳ 4. O Segredo do millis()</h4>
-                        <p>Por que nunca usamos delay() e como o ESP32 faz várias coisas juntas.</p>
+                        <h4>⏳ 4. Multitarefa (millis)</h4>
+                        <p>Processamento dos 4 setores simultaneamente sem pausas travadas.</p>
                     </div>
 
                     <div class="code-menu-btn" data-topic="pwmwrite" onclick="showCodeTopic('pwmwrite', this)">
-                        <h4>💡 5. Comando PWM</h4>
-                        <p>Como o comando ledcWrite aplica o valor de 0 a 255 no pino.</p>
+                        <h4>💡 5. Saída PWM</h4>
+                        <p>Ajuste de intensidade de 0 a 255 diretamente no hardware.</p>
                     </div>
                 </div>
 
@@ -246,7 +244,7 @@
                 <div class="code-main-area">
                     <div class="code-header-bar">
                         <span id="codeFileLabel">📄 SectorController.cpp</span>
-                        <span>C++17 • ESP32 NodeMCU</span>
+                        <span>C++17 • ESP32</span>
                     </div>
 
                     <div class="code-explanation-banner" id="codeExplanation">
@@ -265,13 +263,13 @@
         <!-- ================================================================= -->
         <section id="sec-montagem">
             <div class="section-header">
-                <h2>🛠️ Como Construir a Maquete Física da Pista</h2>
-                <p>Passo a passo completo com medidas exatas, materiais simples e dicas práticas para a sua equipe construir uma maquete resistente e bonita para a feira!</p>
+                <h2>🛠️ Guia de Montagem da Maquete</h2>
+                <p>Dimensões da pista, instalação dos postes e posicionamento dos sensores laterais.</p>
             </div>
 
             <div class="montagem-grid">
                 <div class="blueprint-card">
-                    <h3>📐 Planta Baixa e Medidas da Pista (80 cm x 30 cm)</h3>
+                    <h3>📐 Planta da Pista (80 cm x 30 cm)</h3>
                     <div class="blueprint-canvas-wrap">
                         <canvas id="blueprintCanvas"></canvas>
                     </div>
@@ -280,54 +278,52 @@
                     <div class="steps-container">
                         <div class="step-accordion active" onclick="toggleStep(0)">
                             <div class="step-header">
-                                <span>Etapa 1: A Base de Papelão e o Asfalto</span>
+                                <span>Etapa 1: Base e Asfalto</span>
                                 <span class="step-badge">80 x 30 cm</span>
                             </div>
                             <div class="step-body">
-                                1. Pegue uma placa de <strong>Papel Pluma (Foam Board)</strong> ou Papelão resistente de 80 cm x 30 cm.<br>
-                                2. Cole uma faixa central de <strong>cartolina ou EVA preto com 12 cm de largura</strong> (a pista).<br>
-                                3. Marque os 4 setores nas calçadas laterais a <strong>10cm, 30cm, 50cm e 70cm</strong> da largada.<br>
-                                4. Não precisa furar o asfalto! Os sensores ficam montados nas calçadas laterais como pequenos totens de radar.<br>
-                                5. Desenhe as faixas tracejadas brancas com fita crepe ou corretivo escolar.
+                                1. Placa de Papel Pluma (Foam Board) ou papelão resistente de 80 x 30 cm.<br>
+                                2. Faixa central escura de 12 cm de largura para a pista.<br>
+                                3. Marcar os 4 setores nas calçadas em 10 cm, 30 cm, 50 cm e 70 cm.<br>
+                                4. Faixas tracejadas brancas aplicadas com fita ou corretivo.
                             </div>
                         </div>
 
                         <div class="step-accordion" onclick="toggleStep(1)">
                             <div class="step-header">
-                                <span>Etapa 2: Fabricando os 8 Postes de Luz</span>
-                                <span class="step-badge">Canudos + LEDs</span>
+                                <span>Etapa 2: Postes de Iluminação</span>
+                                <span class="step-badge">8 Postes</span>
                             </div>
                             <div class="step-body">
-                                1. Corte 8 canudos plásticos rígidos pretos com cerca de <strong>10 a 12 cm de altura</strong>.<br>
-                                2. Na perna maior do LED (Ânodo +), conecte o <strong>resistor de 220Ω</strong> e solde/emende um fio fino.<br>
-                                3. Na perna menor (Cátodo -), solde o fio de terra.<br>
-                                4. Isole bem com fita isolante e passe os fios por dentro do canudo até o topo!<br>
-                                5. Cole o canudo em pé na calçada com uma gotinha de cola quente.
+                                1. Canudos ou tubos rígidos pretos com 10 a 12 cm de altura.<br>
+                                2. LED no topo com resistor de 220Ω no terminal positivo (+).<br>
+                                3. Terminal negativo (-) ligado ao barramento comum de terra (GND).<br>
+                                4. Fiação conduzida internamente até a base inferior da maquete.
                             </div>
                         </div>
 
                         <div class="step-accordion" onclick="toggleStep(2)">
                             <div class="step-header">
-                                <span>Etapa 3: Instalando os Sensores TCRT5000 nas Laterais da Pista</span>
-                                <span class="step-badge">Totem / Calçada</span>
+                                <span>Etapa 3: Sensores TCRT5000 nas Calçadas</span>
+                                <span class="step-badge">Totem Lateral</span>
                             </div>
                             <div class="step-body">
-                                1. O sensor TCRT5000 é fixado na <strong>lateral da pista (na calçada)</strong>, deitado na horizontal.<br>
-                                2. As duas lentes apontam diretamente para a <strong>lateral/porta dos carrinhos</strong> (a cerca de 5 a 10 mm do chão).<br>
-                                3. Graças ao <strong>INPUT_PULLUP</strong> do ESP32, você só precisa de <strong>2 fios no detector</strong>: um no GND e o outro no pino de dados, sem resistor externo no fototransistor!<br>
-                                4. O sensor pode ser disfarçado dentro de uma caixinha de papelão imitando um radar de trânsito ou na base do poste.
+                                1. Sensores montados horizontalmente na lateral da pista, alinhados à porta do carrinho.<br>
+                                2. Altura de 5 a 10 mm do chão para foco direto no veículo.<br>
+                                3. Apenas 2 fios no fototransistor: pino GPIO (com INPUT_PULLUP) e GND.<br>
+                                4. Acabamento embutido na base do poste ou em totem de radar.
                             </div>
                         </div>
 
                         <div class="step-accordion" onclick="toggleStep(3)">
                             <div class="step-header">
-                                <span>Etapa 4: Organização dos Fios & Testes de Pista</span>
-                                <span class="step-badge">Testes Finais</span>
+                                <span>Etapa 4: Fiação e Porão Técnico</span>
+                                <span class="step-badge">Acabamento</span>
                             </div>
                             <div class="step-body">
-                                1. Coloque 4 pezinhos de borracha ou calços de 4 cm embaixo da maquete para criar o <strong>porão técnico</strong>.<br>
-                                2. Todos os fios dos postes e sensores descem por furinhos discretos na calçada e ficam escondidos embaixo da mesa!<br>
-                                3. Empurre o carrinho pela pista passando na frente de cada totem lateral para verificar se a luz sobe instantaneamente para 100% e mantém os 2,5 segundos de segurança.
+                                1. Elevar a base com pezinhos de 4 cm para acomodar o ESP32 e fios embaixo da pista.<br>
+                                2. Conectar os setores aos respectivos pinos do ESP32.<br>
+                                3. Testar a resposta imediata de 100% de brilho ao passar o veículo.
                             </div>
                         </div>
                     </div>
@@ -335,57 +331,48 @@
 
                 <!-- Card de Checklist de Bancada -->
                 <div class="checklist-card">
-                    <h3>✅ Checklist Antes da Feira</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted);">Marque cada item conforme sua equipe for concluindo os testes na bancada:</p>
+                    <h3>✅ Checklist de Verificação</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Itens essenciais para a bancada e apresentação:</p>
 
                     <label class="checklist-item" onclick="toggleCheckItem(this)">
                         <input type="checkbox">
-                        <span>Todos os 8 postes acendem fraquinhos ao ligar o cabo USB</span>
+                        <span>Postes acendem em modo econômico (14%) ao energizar o circuito</span>
                     </label>
 
                     <label class="checklist-item" onclick="toggleCheckItem(this)">
                         <input type="checkbox">
-                        <span>Sensor 0 acende o Setor 0 ao passar o carrinho de brinquedo</span>
+                        <span>Cada sensor aciona seu respectivo setor ao passar o veículo</span>
                     </label>
 
                     <label class="checklist-item" onclick="toggleCheckItem(this)">
                         <input type="checkbox">
-                        <span>A luz segura os 2,5 segundos antes de apagar devagarzinho</span>
+                        <span>Brilho sustenta 100% por 2,5s antes da dimerização</span>
                     </label>
 
                     <label class="checklist-item" onclick="toggleCheckItem(this)">
                         <input type="checkbox">
-                        <span>Os setores 1, 2 e 3 funcionam perfeitamente sem falhas</span>
+                        <span>Todos os 4 setores operam de forma independente</span>
                     </label>
 
                     <label class="checklist-item" onclick="toggleCheckItem(this)">
                         <input type="checkbox">
-                        <span>Nenhum fio solto visível por cima da pista (tudo no porão)</span>
+                        <span>Fiação organizada e oculta no porão técnico</span>
                     </label>
 
                     <label class="checklist-item" onclick="toggleCheckItem(this)">
                         <input type="checkbox">
-                        <span>Chavinha de fenda pequena guardada no estojo para ajustes</span>
+                        <span>Alimentação USB estável conectada</span>
                     </label>
-
-                    <label class="checklist-item" onclick="toggleCheckItem(this)">
-                        <input type="checkbox">
-                        <span>Carregador portátil (Powerbank) ou notebook com cabo USB</span>
-                    </label>
-
-                    <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 12px; font-size: 0.85rem; color: #a7f3d0;">
-                        🎉 <strong>Dica de Ouro:</strong> Treine o roteiro de 3 minutos da pasta <code>docs/ROTEIRO_APRESENTACAO.md</code> para impressionar os jurados!
-                    </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Scripts da Aplicação (Carregados Modularmente) -->
-    <script src="js/sim3d.js"></script>
-    <script src="js/circuits.js"></script>
-    <script src="js/codeViewer.js"></script>
-    <script src="js/blueprint.js"></script>
-    <script src="js/app.js"></script>
+    <!-- Scripts da Aplicação (Carregados Modularmente com Cache-Busting) -->
+    <script src="js/sim3d.js?v=3"></script>
+    <script src="js/circuits.js?v=3"></script>
+    <script src="js/codeViewer.js?v=3"></script>
+    <script src="js/blueprint.js?v=3"></script>
+    <script src="js/app.js?v=3"></script>
 </body>
 </html>

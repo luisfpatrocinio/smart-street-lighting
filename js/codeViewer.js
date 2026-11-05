@@ -10,10 +10,9 @@
 const CODE_TOPICS = {
     debounce: {
         file: "SectorController.cpp",
-        title: "Como funciona o Filtro de Ruído (Software Debounce)?",
-        explanation: `<strong>🛡️ Problema:</strong> Na feira de ciências, lâmpadas do teto e sombras de pessoas passando podem enganar o sensor infravermelho.<br>
-        <strong>💡 A Solução no Código:</strong> O ESP32 só aceita que é um carro de verdade se a leitura ficar firme e estável por mais de <strong>30 milissegundos</strong> seguidos!`,
-        snippet: `<span class="code-comment">// Lê o sensor e remove ruídos ou piscadas da luz ambiente</span>
+        title: "Filtro de Ruído Digital (Debounce)",
+        explanation: `<strong>Objetivo:</strong> O ESP32 valida a detecção apenas após o sinal do sensor permanecer estável por mais de <strong>30 milissegundos</strong>, eliminando falsos disparos causados pela luz ambiente.`,
+        snippet: `<span class="code-comment">// Lê o sensor e remove ruídos ou oscilações da luz ambiente</span>
 <span class="code-type">void</span> <span class="code-func">ControladorSetor::filtrarLeituraSensor</span>(<span class="code-type">uint32_t</span> <span class="code-var">tempoAtualMs</span>) {
     <span class="code-type">bool</span> <span class="code-var">leituraAgora</span> = <span class="code-func">digitalRead</span>(config.pinoSensor);
 
@@ -23,7 +22,7 @@ const CODE_TOPICS = {
         momentoFiltro = <span class="code-var">tempoAtualMs</span>;
     }
 
-<span class="code-line-highlight">    <span class="code-comment">// Se ficou estável por 30ms, confirmamos que é um carro de verdade!</span>
+<span class="code-line-highlight">    <span class="code-comment">// Confirma detecção após 30ms de sinal estável</span>
     <span class="code-keyword">if</span> ((<span class="code-var">tempoAtualMs</span> - momentoFiltro) >= <span class="code-var">TEMPO_FILTRO_RUIDO_MS</span>) {
         leituraEstavelSensor = leituraBrutaSensor;
     }</span>
@@ -31,9 +30,8 @@ const CODE_TOPICS = {
     },
     regra25: {
         file: "SectorController.cpp",
-        title: "Como funciona a Regra de Segurança dos 2,5 Segundos?",
-        explanation: `<strong>⏱️ Segurança no Trânsito:</strong> Se a luz apagasse no mesmo milissegundo em que o carro saísse do sensor, o motorista ficaria no escuro!<br>
-        <strong>💡 A Solução no Código:</strong> Guardamos o instante exato em que o carro passou. O poste só começa a apagar depois de <strong>2.500 milissegundos</strong>.`,
+        title: "Temporizador de Travessia (2,5s)",
+        explanation: `<strong>Objetivo:</strong> Mantém o setor em 100% de brilho por <strong>2.500 milissegundos</strong> após a saída do veículo, garantindo a travessia segura antes de iniciar a economia de energia.`,
         snippet: `<span class="code-comment">// Decide se o poste precisa ficar forte (carro) ou fraco (economia)</span>
 <span class="code-type">void</span> <span class="code-func">ControladorSetor::decidirBrilhoDesejado</span>(<span class="code-type">uint32_t</span> <span class="code-var">tempoAtualMs</span>) {
     <span class="code-keyword">if</span> (<span class="code-func">temCarro</span>()) {
@@ -46,17 +44,16 @@ const CODE_TOPICS = {
 <span class="code-line-highlight">        <span class="code-keyword">if</span> (<span class="code-var">tempoDesdeQuePassou</span> < <span class="code-var">TEMPO_MANTER_ACESO_MS</span>) {
             brilhoDesejado = <span class="code-var">BRILHO_MAXIMO</span>; <span class="code-comment">// Mantém 100% pelos 2,5s</span>
         } <span class="code-keyword">else</span> {
-            brilhoDesejado = <span class="code-var">BRILHO_LUA</span>;     <span class="code-comment">// Volta aos 14% ecológicos</span>
+            brilhoDesejado = <span class="code-var">BRILHO_LUA</span>;     <span class="code-comment">// Volta aos 14% econômicos</span>
         }</span>
     }
 }`
     },
     fade: {
         file: "SectorController.cpp",
-        title: "Como funciona o Efeito Suave de Acender e Apagar (Fade)?",
-        explanation: `<strong>✨ Conforto Visual:</strong> Lâmpadas que acendem em um tranco repentino cegam o motorista.<br>
-        <strong>💡 A Solução no Código:</strong> A cada 15 milissegundos, aumentamos ou diminuímos apenas alguns passinhos do brilho, criando uma curva suave e bonita!`,
-        snippet: `<span class="code-comment">// Faz a transição de brilho acontecer devagar e com elegância</span>
+        title: "Dimerização Gradual (Fade Suave)",
+        explanation: `<strong>Objetivo:</strong> Altera o brilho em passos controlados a cada 15 milissegundos, gerando uma transição visual confortável e sem oscilações bruscas na rede.`,
+        snippet: `<span class="code-comment">// Faz a transição de brilho acontecer gradualmente</span>
 <span class="code-type">void</span> <span class="code-func">ControladorSetor::ajustarBrilhoSuave</span>(<span class="code-type">uint32_t</span> <span class="code-var">tempoAtualMs</span>) {
     <span class="code-comment">// Só dá um passo de ajuste a cada 15 milissegundos</span>
     <span class="code-keyword">if</span> ((<span class="code-var">tempoAtualMs</span> - momentoFade) < <span class="code-var">INTERVALO_EFEITO_MS</span>) <span class="code-keyword">return</span>;
@@ -75,27 +72,26 @@ const CODE_TOPICS = {
     },
     millis: {
         file: "main.cpp",
-        title: "Por que usamos millis() e NUNCA delay()?",
-        explanation: `<strong>⏳ O Grande Erro do delay():</strong> O comando <code>delay()</code> congela todo o cérebro do ESP32. Se um carro passar no Setor 3 enquanto a placa está esperando um delay no Setor 1, o sensor perde o carro!<br>
-        <strong>💡 O Segredo do millis():</strong> A função <code>millis()</code> lê o cronômetro interno do ESP32 sem parar o código. Assim, todos os 4 setores rodam ao mesmo tempo!`,
+        title: "Multitarefa em Tempo Real com millis()",
+        explanation: `<strong>Objetivo:</strong> O uso de <code>millis()</code> substitui pausas bloqueantes de <code>delay()</code>, permitindo que os 4 setores da pista operem simultaneamente sem perda de sincronismo.`,
         snippet: `<span class="code-comment">// O loop principal nunca para e nunca congela o processador</span>
 <span class="code-type">void</span> <span class="code-func">loop</span>() {
-<span class="code-line-highlight">    <span class="code-comment">// Pegamos o relógio do ESP32 (milissegundos desde que foi ligado)</span>
+<span class="code-line-highlight">    <span class="code-comment">// Lê o cronômetro contínuo do ESP32</span>
     <span class="code-keyword">const</span> <span class="code-type">uint32_t</span> <span class="code-var">tempoAtualMs</span> = <span class="code-func">millis</span>();</span>
 
-    <span class="code-comment">// Atualiza os 4 setores da pista de forma independente e simultânea</span>
+    <span class="code-comment">// Atualiza os 4 setores da pista de forma simultânea</span>
     <span class="code-keyword">for</span> (<span class="code-type">size_t</span> <span class="code-var">i</span> = 0; <span class="code-var">i</span> < <span class="code-var">TOTAL_SETORES</span>; ++<span class="code-var">i</span>) {
         setores[<span class="code-var">i</span>].<span class="code-func">atualizar</span>(<span class="code-var">tempoAtualMs</span>);
     }
 
-    <span class="code-comment">// Mostra os dados na tela do computador da feira</span>
+    <span class="code-comment">// Envia telemetria serial</span>
     <span class="code-func">imprimirStatusNaTela</span>(<span class="code-var">tempoAtualMs</span>);
 }`
     },
     pwmwrite: {
         file: "SectorController.cpp",
-        title: "Como o comando ledcWrite comanda a potência?",
-        explanation: `<strong>💡 Controle do Hardware:</strong> A função <code>ledcWrite()</code> escreve um valor entre <strong>0</strong> (totalmente apagado) e <strong>255</strong> (100% aceso). O ESP32 gera a onda quadrada na frequência de 5.000 Hz automaticamente pelo chip!`,
+        title: "Geração de Pulsos PWM (5.000 Hz)",
+        explanation: `<strong>Objetivo:</strong> A função <code>ledcWrite()</code> ajusta o ciclo de trabalho de 0 a 255 diretamente no hardware do ESP32, sem sobrecarregar o processador principal.`,
         snippet: `<span class="code-comment">// Envia o valor de brilho de 0 a 255 para o gerador de pulsos de hardware</span>
 <span class="code-type">void</span> <span class="code-func">ControladorSetor::enviarPwmParaLed</span>(<span class="code-type">uint8_t</span> <span class="code-var">brilho</span>) {
 <span class="code-line-highlight">#if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
