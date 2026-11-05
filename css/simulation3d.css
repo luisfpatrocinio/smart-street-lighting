@@ -62,23 +62,43 @@
 .sim-btn.active {
     background: var(--accent-blue);
     color: #fff;
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 12px var(--accent-glow);
 }
 
-.sim-info-badge {
+/* Legenda da Fiação 3D */
+.sim-wiring-legend {
     position: absolute;
     top: 16px;
     left: 16px;
-    background: rgba(17, 24, 39, 0.85);
-    backdrop-filter: blur(8px);
-    padding: 8px 16px;
+    background: rgba(11, 17, 28, 0.92);
+    backdrop-filter: blur(10px);
+    padding: 8px 14px;
     border-radius: var(--radius-md);
-    border: 1px solid var(--border);
-    font-size: 0.85rem;
-    color: var(--accent-cyan);
-    font-weight: 700;
-    pointer-events: none;
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     z-index: 10;
+    animation: fadeIn 0.25s ease;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
+
+.legend-chip {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: #172235;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.chip-red { color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+.chip-blue { color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+.chip-green { color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+.chip-yellow { color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
 
 /* 3D Sidebar Telemetry */
 .sim-sidebar {

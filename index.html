@@ -59,13 +59,20 @@
 
             <div class="sim-container">
                 <div class="viewport-3d-wrapper">
-                    <div class="sim-info-badge" id="simBadge">🚗 PISTA LIVRE • MODO NOTURNO (14% DE LUZ)</div>
+                    <!-- Legenda interativa exibida apenas no modo de Fiação 3D -->
+                    <div class="sim-wiring-legend" id="wiringLegend" style="display: none;">
+                        <span class="legend-chip chip-red">🔴 3.3V (VCC)</span>
+                        <span class="legend-chip chip-blue">🔵 GND (Terra)</span>
+                        <span class="legend-chip chip-green">🟢 GPIO (LEDs PWM)</span>
+                        <span class="legend-chip chip-yellow">🟡 GPIO (Sensores)</span>
+                    </div>
+
                     <canvas id="canvas3d"></canvas>
                     
                     <div class="sim-overlay-controls">
                         <button class="sim-btn" onclick="toggleDrive()" id="btnDrive">▶ Iniciar Carrinho</button>
                         <button class="sim-btn" onclick="resetCar()">⏪ Reiniciar Posição</button>
-                        <button class="sim-btn" onclick="toggleNight()" id="btnNight">🌙 Modo Noite</button>
+                        <button class="sim-btn" onclick="toggleWireView()" id="btnWireView">🔌 Ver Fiação 3D</button>
                         <button class="sim-btn" onclick="resetCamera()">🎥 Redefinir Câmera</button>
                     </div>
                 </div>
