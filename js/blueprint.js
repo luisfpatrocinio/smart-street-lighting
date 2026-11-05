@@ -56,10 +56,18 @@ function renderBlueprint() {
     sensorOffsets.forEach((ratio, idx) => {
         const posX = marginX + boardW * ratio;
 
-        // Poste de Iluminação na Calçada (Círculo Amarelo com borda branca)
+        // Postes Norte e Sul (8 Postes no total, 2 por setor)
         ctx.fillStyle = "#fcd34d";
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 1.5;
+
+        // Poste Calçada Norte
+        ctx.beginPath();
+        ctx.arc(posX, roadY - 14, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Poste Calçada Sul
         ctx.beginPath();
         ctx.arc(posX, roadY + roadH + 18, 7, 0, Math.PI * 2);
         ctx.fill();

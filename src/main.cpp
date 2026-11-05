@@ -5,20 +5,20 @@
  * Feira de Robótica / Smart City
  * ============================================================================
  * 
- * O sistema controla 4 postes ao longo da via. Cada setor possui:
- * - 1 Sensor Infravermelho (TCRT5000) na calçada lateral (com INPUT_PULLUP)
- * - 1 Poste de iluminação com LED controlado por PWM (5 kHz)
+ * O sistema controla 4 setores ao longo da via:
+ * - 4 Sensores Infravermelhos (TCRT5000) nas calçadas laterais (1 por setor)
+ * - 8 Postes de iluminação com LEDs (2 postes em paralelo por setor, um em cada calçada)
  * 
  * Lógica de Operação:
  * - Em repouso: brilho noturno econômico em 14% (~35/255).
- * - Ao detectar veículo: sobe rapidamente para 100% (255/255).
+ * - Ao detectar veículo: os 2 postes do setor sobem rapidamente para 100%.
  * - Após o veículo passar: sustenta 100% por 2,5 segundos e dimeriza suavemente.
  * 
  * Mapeamento dos Pinos no ESP32:
- * - Poste 1: Sensor GPIO 18 | LED GPIO 2  | Canal PWM 0
- * - Poste 2: Sensor GPIO 19 | LED GPIO 4  | Canal PWM 1
- * - Poste 3: Sensor GPIO 21 | LED GPIO 5  | Canal PWM 2
- * - Poste 4: Sensor GPIO 22 | LED GPIO 23 | Canal PWM 3
+ * - Setor 1: Sensor GPIO 18 | Postes GPIO 2  | Canal PWM 0
+ * - Setor 2: Sensor GPIO 19 | Postes GPIO 4  | Canal PWM 1
+ * - Setor 3: Sensor GPIO 21 | Postes GPIO 5  | Canal PWM 2
+ * - Setor 4: Sensor GPIO 22 | Postes GPIO 23 | Canal PWM 3
  * ============================================================================
  */
 
@@ -27,7 +27,7 @@
 // ============================================================================
 // PARÂMETROS DO SISTEMA
 // ============================================================================
-const int TOTAL_POSTES           = 4;
+const int TOTAL_SETORES          = 4;
 
 const int BRILHO_LUA             = 35;   // ~14% - Modo Noturno Econômico
 const int BRILHO_MAXIMO          = 255;  // 100% - Potência máxima com veículo
@@ -41,9 +41,9 @@ const unsigned long TEMPO_FILTRO_MS    = 30;   // Filtro de ruído do sensor (de
 const unsigned long INTERVALO_SERIAL_MS= 500;  // Telemetria serial 2x por segundo
 
 // ============================================================================
-// ESTRUTURA DE CONTROLE DE CADA POSTE
+// ESTRUTURA DE CONTROLE DE CADA SETOR (1 SENSOR + 2 POSTES EM PARALELO)
 // ============================================================================
-struct Poste {
+struct Setor {
     int pinoSensor;
     int pinoLed;
     int canalPwm;
@@ -60,16 +60,16 @@ struct Poste {
     bool carroDetectado;
 };
 
-// Inicialização dos 4 Postes
-Poste postes[TOTAL_POSTES] = {
-    {18,  2, 0, BRILHO_LUA, BRILHO_LUA, 0, 0, 0, HIGH, HIGH, false}, // Poste 1
-    {19,  4, 1, BRILHO_LUA, BRILHO_LUA, 0, 0, 0, HIGH, HIGH, false}, // Poste 2
-    {21,  5, 2, BRILHO_LUA, BRILHO_LUA, 0, 0, 0, HIGH, HIGH, false}, // Poste 3
-    {22, 23, 3, BRILHO_LUA, BRILHO_LUA, 0, 0, 0, HIGH, HIGH, false}  // Poste 4
+// Inicialização dos 4 Setores (8 postes no total)
+Setor setores[TOTAL_SETORES] = {
+    {18,  2, 0, BRILHO_LUA, BRILHO_LUA, 0, 0, 0, HIGH, HIGH, false}, // Setor 1
+    {19,  4, 1, BRILHO_LUA, BRILHO_LUA, 0, 0, 0, HIGH, HIGH, false}, // Setor 2
+    {21,  5, 2, BRILHO_LUA, BRILHO_LUA, 0, 0, 0, HIGH, HIGH, false}, // Setor 3
+    {22, 23, 3, BRILHO_LUA, BRILHO_LUA, 0, 0, 0, HIGH, HIGH, false}  // Setor 4
 };
 
 // ============================================================================
-// FUNÇÃO AUXILIAR: Envia valor PWM ao LED do Poste
+// FUNÇÃO AUXILIAR: Envia valor PWM aos LEDs do Setor
 // ============================================================================
 void enviarPwm(int pinoLed, int canalPwm, int brilho) {
 #if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
@@ -80,43 +80,43 @@ void enviarPwm(int pinoLed, int canalPwm, int brilho) {
 }
 
 // ============================================================================
-// FUNÇÃO: Atualiza a lógica de 1 poste (não-bloqueante via millis)
+// FUNÇÃO: Atualiza a lógica de 1 setor (não-bloqueante via millis)
 // ============================================================================
-void atualizarPoste(Poste &p, unsigned long agora) {
+void atualizarSetor(Setor &s, unsigned long agora) {
     // 1. Leitura do Sensor com Filtro de Ruído Digital (30ms)
-    int leitura = digitalRead(p.pinoSensor);
-    if (leitura != p.ultimaLeituraBruta) {
-        p.ultimaLeituraBruta = leitura;
-        p.momentoFiltro = agora;
+    int leitura = digitalRead(s.pinoSensor);
+    if (leitura != s.ultimaLeituraBruta) {
+        s.ultimaLeituraBruta = leitura;
+        s.momentoFiltro = agora;
     }
-    if ((agora - p.momentoFiltro) >= TEMPO_FILTRO_MS) {
-        p.leituraEstavel = p.ultimaLeituraBruta;
+    if ((agora - s.momentoFiltro) >= TEMPO_FILTRO_MS) {
+        s.leituraEstavel = s.ultimaLeituraBruta;
     }
 
     // Com INPUT_PULLUP: LOW = carro refletindo o feixe infravermelho
-    p.carroDetectado = (p.leituraEstavel == LOW);
+    s.carroDetectado = (s.leituraEstavel == LOW);
 
     // 2. Temporizador de Segurança (2,5 segundos)
-    if (p.carroDetectado) {
-        p.brilhoDesejado = BRILHO_MAXIMO;
-        p.momentoSaida = agora;
+    if (s.carroDetectado) {
+        s.brilhoDesejado = BRILHO_MAXIMO;
+        s.momentoSaida = agora;
     } else {
-        if ((agora - p.momentoSaida) < TEMPO_SEGURANCA_MS) {
-            p.brilhoDesejado = BRILHO_MAXIMO; // Continua aceso
+        if ((agora - s.momentoSaida) < TEMPO_SEGURANCA_MS) {
+            s.brilhoDesejado = BRILHO_MAXIMO; // Continua aceso
         } else {
-            p.brilhoDesejado = BRILHO_LUA;    // Retorna ao modo econômico
+            s.brilhoDesejado = BRILHO_LUA;    // Retorna ao modo econômico
         }
     }
 
     // 3. Efeito Fade (Dimerização Suave a cada 15ms)
-    if ((agora - p.momentoFade) >= TEMPO_FADE_MS) {
-        p.momentoFade = agora;
-        if (p.brilhoAtual < p.brilhoDesejado) {
-            p.brilhoAtual = min(p.brilhoDesejado, p.brilhoAtual + PASSO_ACENDER);
-            enviarPwm(p.pinoLed, p.canalPwm, p.brilhoAtual);
-        } else if (p.brilhoAtual > p.brilhoDesejado) {
-            p.brilhoAtual = max(p.brilhoDesejado, p.brilhoAtual - PASSO_APAGAR);
-            enviarPwm(p.pinoLed, p.canalPwm, p.brilhoAtual);
+    if ((agora - s.momentoFade) >= TEMPO_FADE_MS) {
+        s.momentoFade = agora;
+        if (s.brilhoAtual < s.brilhoDesejado) {
+            s.brilhoAtual = min(s.brilhoDesejado, s.brilhoAtual + PASSO_ACENDER);
+            enviarPwm(s.pinoLed, s.canalPwm, s.brilhoAtual);
+        } else if (s.brilhoAtual > s.brilhoDesejado) {
+            s.brilhoAtual = max(s.brilhoDesejado, s.brilhoAtual - PASSO_APAGAR);
+            enviarPwm(s.pinoLed, s.canalPwm, s.brilhoAtual);
         }
     }
 }
@@ -130,7 +130,8 @@ void setup() {
 
     Serial.println();
     Serial.println(F("======================================================"));
-    Serial.println(F("   POSTES INTELIGENTES (SMART STREET LIGHTING - 4P)   "));
+    Serial.println(F("   POSTES INTELIGENTES (SMART STREET LIGHTING)        "));
+    Serial.println(F("   4 Setores | 4 Sensores | 8 Postes de Iluminação    "));
     Serial.println(F("======================================================"));
     Serial.println(F(" Modo Noturno (Lua) : 14%"));
     Serial.println(F(" Brilho com Carro   : 100%"));
@@ -138,22 +139,22 @@ void setup() {
     Serial.println(F(" Frequencia PWM     : 5.000 Hz"));
     Serial.println(F("------------------------------------------------------"));
 
-    for (int i = 0; i < TOTAL_POSTES; i++) {
+    for (int i = 0; i < TOTAL_SETORES; i++) {
         // Sensor TCRT5000 com resistor pull-up interno ativado
-        pinMode(postes[i].pinoSensor, INPUT_PULLUP);
+        pinMode(setores[i].pinoSensor, INPUT_PULLUP);
 
-        // Configuração do canal PWM para o LED do poste
+        // Configuração do canal PWM para os LEDs dos postes do setor
 #if defined(ESP_ARDUINO_VERSION_MAJOR) && (ESP_ARDUINO_VERSION_MAJOR >= 3)
-        ledcAttach(postes[i].pinoLed, 5000, 8);
+        ledcAttach(setores[i].pinoLed, 5000, 8);
 #else
-        ledcSetup(postes[i].canalPwm, 5000, 8);
-        ledcAttachPin(postes[i].pinoLed, postes[i].canalPwm);
+        ledcSetup(setores[i].canalPwm, 5000, 8);
+        ledcAttachPin(setores[i].pinoLed, setores[i].canalPwm);
 #endif
         // Inicia em modo econômico (14%)
-        enviarPwm(postes[i].pinoLed, postes[i].canalPwm, BRILHO_LUA);
+        enviarPwm(setores[i].pinoLed, setores[i].canalPwm, BRILHO_LUA);
 
-        Serial.printf(" [Poste %d] Sensor: GPIO %2d  |  LED: GPIO %2d  |  PWM: %d\n",
-                      i + 1, postes[i].pinoSensor, postes[i].pinoLed, postes[i].canalPwm);
+        Serial.printf(" [Setor %d] Sensor: GPIO %2d  |  LEDs Postes: GPIO %2d  |  PWM: %d\n",
+                      i + 1, setores[i].pinoSensor, setores[i].pinoLed, setores[i].canalPwm);
     }
 
     Serial.println(F("======================================================"));
@@ -161,16 +162,16 @@ void setup() {
 }
 
 // ============================================================================
-// LOOP: Monitora os 4 postes continuamente sem travar o ESP32
+// LOOP: Monitora os 4 setores continuamente sem travar o ESP32
 // ============================================================================
 unsigned long ultimoRelatorio = 0;
 
 void loop() {
     const unsigned long agora = millis();
 
-    // 1. Atualiza cada um dos 4 postes
-    for (int i = 0; i < TOTAL_POSTES; i++) {
-        atualizarPoste(postes[i], agora);
+    // 1. Atualiza cada um dos 4 setores
+    for (int i = 0; i < TOTAL_SETORES; i++) {
+        atualizarSetor(setores[i], agora);
     }
 
     // 2. Relatório de Telemetria no Monitor Serial a cada 500ms
@@ -178,13 +179,14 @@ void loop() {
         ultimoRelatorio = agora;
 
         Serial.printf("[%6lu s] ", agora / 1000);
-        for (int i = 0; i < TOTAL_POSTES; i++) {
-            int pct = (postes[i].brilhoAtual * 100) / 255;
-            Serial.printf("P%d:[%s|%3d%%]  ",
+        for (int i = 0; i < TOTAL_SETORES; i++) {
+            int pct = (setores[i].brilhoAtual * 100) / 255;
+            Serial.printf("S%d:[%s|%3d%%]  ",
                           i + 1,
-                          postes[i].carroDetectado ? "CARRO" : "LIVRE",
+                          setores[i].carroDetectado ? "CARRO" : "LIVRE",
                           pct);
         }
         Serial.println();
     }
 }
+
