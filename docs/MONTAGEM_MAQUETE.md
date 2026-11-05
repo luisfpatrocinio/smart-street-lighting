@@ -37,12 +37,13 @@ A pista possui **80 cm** de extensão dividida em **4 setores de 20 cm cada**.
 |   (10 cm)            (30 cm)            (50 cm)            (70 cm)        |
 + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
 |                                                                           | Faixa 1 (Ida)
-|  [Sensor 0]          [Sensor 1]         [Sensor 2]         [Sensor 3]     |
-|   (10 cm)            (30 cm)            (50 cm)            (70 cm)        |
+|                                                                           |
 | - - - - - - - - -  - - - - - - - - -  - - - - - - - - -  - - - - - - - -  | Faixa Tracejada
 |                                                                           | Faixa 2 (Volta)
-+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
-| [Poste 0B]         [Poste 1B]         [Poste 2B]         [Poste 3B]       | Calçada Sul
+|   ▲ Feixe IR          ▲ Feixe IR         ▲ Feixe IR         ▲ Feixe IR    | (Horizontal)
++ - ┼ - - - - - - -  - -┼ - - - - - - - - -┼ - - - - - - -  - ┼ - - - - - - +
+| [Sensor 0]         [Sensor 1]         [Sensor 2]         [Sensor 3]       | Calçada Sul
+| [Poste 0B]         [Poste 1B]         [Poste 2B]         [Poste 3B]       | (Totens de Radar)
 |   (10 cm)            (30 cm)            (50 cm)            (70 cm)        |
 +---------------------------------------------------------------------------+
 |                              SETOR 0    |   SETOR 1    |   SETOR 2    |   SETOR 3 |

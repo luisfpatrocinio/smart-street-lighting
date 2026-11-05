@@ -90,12 +90,14 @@ constexpr uint32_t TEMPO_FILTRO_RUIDO_MS  = 30;
 constexpr uint32_t INTERVALO_MENSAGENS_MS = 500;
 
 // ============================================================================
-// 3. LÓGICA DO SENSOR ÓPTICO TCRT5000
+// 3. LÓGICA DO SENSOR ÓPTICO TCRT5000 (COM PULL-UP INTERNO DO ESP32)
 // ============================================================================
 
 /**
- * @brief Nível lógico do pino DO (Digital Output) quando um objeto reflete o feixe IR.
- * O comparador LM393 da plaquinha chaveia para nível lógico BAIXO (0V / LOW) ao detectar o carro.
+ * @brief Nível lógico do pino quando um objeto reflete o feixe IR.
+ * Usando o resistor interno INPUT_PULLUP de 45kΩ do ESP32:
+ * - Sem obstáculo: o resistor interno mantém o pino em 3.3V (HIGH).
+ * - Com obstáculo: o fototransistor fecha para o GND -> o pino vai para 0V (LOW).
  */
 constexpr uint8_t SENSOR_CARRO_PRESENTE = LOW;
 
@@ -115,22 +117,16 @@ struct SetorPoste {
 };
 
 /**
- * @brief Número total de setores independentes distribuídos ao longo da pista da maquete.
+ * @brief Número de setores ativos no momento (reduzido para 1 para teste de bancada).
  */
-constexpr size_t TOTAL_SETORES = 4;
+constexpr size_t TOTAL_SETORES = 1;
 
 /**
- * @brief Mapeamento de pinos padrão para a maquete de 4 setores:
- * - Setor 0: Sensor no GPIO 18 | LEDs no GPIO 25 | Canal PWM 0
- * - Setor 1: Sensor no GPIO 19 | LEDs no GPIO 26 | Canal PWM 1
- * - Setor 2: Sensor no GPIO 21 | LEDs no GPIO 27 | Canal PWM 2
- * - Setor 3: Sensor no GPIO 22 | LEDs no GPIO 14 | Canal PWM 3
+ * @brief Mapeamento de pinos do Setor 0 de teste:
+ * - Setor 0: Sensor no GPIO 18 | LEDs no GPIO 2 (LED onboard/externo) | Canal PWM 0
  */
 constexpr SetorPoste LISTA_SETORES[TOTAL_SETORES] = {
-    {0, 18, 25, 0},
-    {1, 19, 26, 1},
-    {2, 21, 27, 2},
-    {3, 22, 14, 3}
+    {0, 18, 2,  0}
 };
 
 } // namespace SmartLighting

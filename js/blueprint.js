@@ -2,8 +2,9 @@
  * ============================================================================
  * GUIA DE MONTAGEM FÍSICA: PLANTA BAIXA & CHECKLIST INTERATIVO
  * ============================================================================
- * Renderização gráfica em Canvas 2D da maquete de 80 x 30 cm, controle de
- * expansão de etapas (accordion) e checklist dinâmico com persistência.
+ * Renderização gráfica em Canvas 2D da maquete de 80 x 30 cm mostrando a
+ * instalação dos sensores TCRT5000 nas LATERAIS da pista (calçada), controle
+ * de expansão de etapas (accordion) e checklist dinâmico de bancada.
  * ============================================================================
  */
 
@@ -34,6 +35,11 @@ function renderBlueprint() {
     ctx.fillStyle = "#090d16";
     ctx.fillRect(marginX, roadY, boardW, roadH);
 
+    // Calçadas norte e sul
+    ctx.fillStyle = "rgba(51, 65, 85, 0.4)";
+    ctx.fillRect(marginX, marginY, boardW, roadY - marginY);
+    ctx.fillRect(marginX, roadY + roadH, boardW, marginY + boardH - (roadY + roadH));
+
     // Faixa central tracejada
     ctx.strokeStyle = "#e2e8f0";
     ctx.lineWidth = 2;
@@ -50,13 +56,6 @@ function renderBlueprint() {
     sensorOffsets.forEach((ratio, idx) => {
         const posX = marginX + boardW * ratio;
 
-        // Furo do Sensor (Quadrinho Vermelho com borda branca)
-        ctx.fillStyle = "#ef4444";
-        ctx.fillRect(posX - 8, roadY + roadH / 2 - 8, 16, 16);
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(posX - 8, roadY + roadH / 2 - 8, 16, 16);
-
         // Postes Norte e Sul (Círculos Amarelos com borda branca)
         ctx.fillStyle = "#fcd34d";
         ctx.beginPath();
@@ -65,9 +64,31 @@ function renderBlueprint() {
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(posX, roadY + roadH + 14, 7, 0, Math.PI * 2);
+        ctx.arc(posX, roadY + roadH + 18, 7, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
+
+        // Sensor TCRT5000 LATERAL na Calçada Sul (apontando horizontalmente para a pista)
+        const sensorX = posX - 12;
+        const sensorY = roadY + roadH + 2;
+        const sensorW = 24;
+        const sensorH = 12;
+
+        ctx.fillStyle = "#ef4444";
+        ctx.fillRect(sensorX, sensorY, sensorW, sensorH);
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(sensorX, sensorY, sensorW, sensorH);
+
+        // Feixe óptico horizontal que cruza a faixa da pista
+        ctx.strokeStyle = "rgba(239, 68, 68, 0.6)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(posX, sensorY);
+        ctx.lineTo(posX, roadY + roadH / 2 + 4);
+        ctx.stroke();
+        ctx.setLineDash([]);
 
         // Rótulos de Setor
         ctx.fillStyle = "#38bdf8";
@@ -85,7 +106,9 @@ function renderBlueprint() {
     ctx.fillStyle = "#fcd34d";
     ctx.fillText("🟡 Poste de LED", marginX + 10, h - 8);
     ctx.fillStyle = "#ef4444";
-    ctx.fillText("🟥 Sensor TCRT5000", marginX + 130, h - 8);
+    ctx.fillText("🟥 Sensor Lateral (Calçada)", marginX + 120, h - 8);
+    ctx.fillStyle = "rgba(239, 68, 68, 0.8)";
+    ctx.fillText("┄ Feixe Horizontal", marginX + 290, h - 8);
     ctx.fillStyle = "#94a3b8";
     ctx.fillText("Base: 80 cm x 30 cm", w - 160, h - 8);
 }

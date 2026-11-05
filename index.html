@@ -279,8 +279,9 @@
                             <div class="step-body">
                                 1. Pegue uma placa de <strong>Papel Pluma (Foam Board)</strong> ou Papelão resistente de 80 cm x 30 cm.<br>
                                 2. Cole uma faixa central de <strong>cartolina ou EVA preto com 12 cm de largura</strong> (a pista).<br>
-                                3. Faça os 4 furos retangulares (1,5 x 1 cm) a <strong>10cm, 30cm, 50cm e 70cm</strong> da largada para encaixar os sensores TCRT5000.<br>
-                                4. Desenhe as faixas tracejadas brancas com fita crepe ou corretivo escolar.
+                                3. Marque os 4 setores nas calçadas laterais a <strong>10cm, 30cm, 50cm e 70cm</strong> da largada.<br>
+                                4. Não precisa furar o asfalto! Os sensores ficam montados nas calçadas laterais como pequenos totens de radar.<br>
+                                5. Desenhe as faixas tracejadas brancas com fita crepe ou corretivo escolar.
                             </div>
                         </div>
 
@@ -300,25 +301,26 @@
 
                         <div class="step-accordion" onclick="toggleStep(2)">
                             <div class="step-header">
-                                <span>Etapa 3: Fixando os Sensores TCRT5000 no Chão</span>
-                                <span class="step-badge">Subterrâneo</span>
+                                <span>Etapa 3: Instalando os Sensores TCRT5000 nas Laterais da Pista</span>
+                                <span class="step-badge">Totem / Calçada</span>
                             </div>
                             <div class="step-body">
-                                1. O sensor TCRT5000 possui 2 "olhinhos": um transparente (emissor) e um preto (receptor).<br>
-                                2. Encaixe a plaquinha <strong>por baixo da base</strong> para que apenas os olhinhos fiquem rentes ao asfalto apontando para cima.<br>
-                                3. Cole com cola quente ou fita dupla-face reforçada, sem tampar a lente dos olhinhos!
+                                1. O sensor TCRT5000 é fixado na <strong>lateral da pista (na calçada)</strong>, deitado na horizontal.<br>
+                                2. As duas lentes apontam diretamente para a <strong>lateral/porta dos carrinhos</strong> (a cerca de 5 a 10 mm do chão).<br>
+                                3. Graças ao <strong>INPUT_PULLUP</strong> do ESP32, você só precisa de <strong>2 fios no detector</strong>: um no GND e o outro no pino de dados, sem resistor externo no fototransistor!<br>
+                                4. O sensor pode ser disfarçado dentro de uma caixinha de papelão imitando um radar de trânsito ou na base do poste.
                             </div>
                         </div>
 
                         <div class="step-accordion" onclick="toggleStep(3)">
                             <div class="step-header">
-                                <span>Etapa 4: Organização dos Fios & Calibração</span>
+                                <span>Etapa 4: Organização dos Fios & Testes de Pista</span>
                                 <span class="step-badge">Testes Finais</span>
                             </div>
                             <div class="step-body">
                                 1. Coloque 4 pezinhos de borracha ou calços de 4 cm embaixo da maquete para criar o <strong>porão técnico</strong>.<br>
-                                2. Todos os fios dos postes e sensores descem pelos furinhos e ficam escondidos embaixo da mesa!<br>
-                                3. Com o carrinho na mão, passe por cada setor e use uma chavinha de fenda no parafusinho azul (trimpot) para deixar a detecção 100% perfeita.
+                                2. Todos os fios dos postes e sensores descem por furinhos discretos na calçada e ficam escondidos embaixo da mesa!<br>
+                                3. Empurre o carrinho pela pista passando na frente de cada totem lateral para verificar se a luz sobe instantaneamente para 100% e mantém os 2,5 segundos de segurança.
                             </div>
                         </div>
                     </div>

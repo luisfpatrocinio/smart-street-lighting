@@ -17,12 +17,9 @@ using namespace SmartLighting;
 // ============================================================================
 // INSTANCIAÇÃO DOS SETORES DA MAQUETE
 // ============================================================================
-// Cria o arranjo contendo os controladores dos 4 setores da pista
+// Cria o arranjo contendo o Setor 0 para validação na bancada
 ControladorSetor setores[TOTAL_SETORES] = {
-    ControladorSetor(LISTA_SETORES[0]),
-    ControladorSetor(LISTA_SETORES[1]),
-    ControladorSetor(LISTA_SETORES[2]),
-    ControladorSetor(LISTA_SETORES[3])
+    ControladorSetor(LISTA_SETORES[0])
 };
 
 // Variável para controle da taxa de atualização do monitor serial
@@ -63,7 +60,9 @@ void imprimirStatusNaTela(uint32_t tempoAtualMs) {
     }
     momentoUltimoRelatorio = tempoAtualMs;
 
-    Serial.printf("[%6lu s] ", static_cast<unsigned long>(tempoAtualMs / 1000));
+    Serial.printf("[%6lu s] (D18_RAW=%d) ", 
+                  static_cast<unsigned long>(tempoAtualMs / 1000), 
+                  digitalRead(18));
 
     for (size_t i = 0; i < TOTAL_SETORES; ++i) {
         bool carroDetectado = setores[i].temCarro();

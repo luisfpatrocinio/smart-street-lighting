@@ -5,8 +5,9 @@
  * Simula em tempo real a rodovia em escala com:
  * - 4 setores autônomos
  * - 8 postes de iluminação pública com lâmpadas LED emissivas
- * - 4 módulos de sensores ópticos reflexivos infravermelhos TCRT5000
- * - Carrinho que percorre a via e dispara os sensores
+ * - 4 totens com sensores ópticos TCRT5000 montados nas laterais da pista (calçada)
+ *   com feixe horizontal infravermelho apontado para a lateral dos veículos
+ * - Carrinho que percorre a via e dispara os sensores laterais
  * ============================================================================
  */
 
@@ -37,7 +38,7 @@ function init3D() {
     scene.fog = new THREE.FogExp2(0x060913, 0.025);
 
     camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.set(0, 18, 28);
+    camera.position.set(0, 16, 26);
 
     renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
@@ -74,15 +75,15 @@ function buildRoadway() {
     scene.add(road);
 
     // Calçadas laterais (Curb)
-    const curbGeo = new THREE.BoxGeometry(44, 0.3, 1.2);
+    const curbGeo = new THREE.BoxGeometry(44, 0.35, 1.4);
     const curbMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
     
     const curbNorth = new THREE.Mesh(curbGeo, curbMat);
-    curbNorth.position.set(0, 0.15, -4.6);
+    curbNorth.position.set(0, 0.175, -4.7);
     scene.add(curbNorth);
 
     const curbSouth = new THREE.Mesh(curbGeo, curbMat);
-    curbSouth.position.set(0, 0.15, 4.6);
+    curbSouth.position.set(0, 0.175, 4.7);
     scene.add(curbSouth);
 
     // Faixas centrais tracejadas
@@ -107,7 +108,7 @@ function buildRoadway() {
 function buildStreetlamps() {
     SECTORS_DATA.forEach(sec => {
         // 2 postes por setor (um em cada calçada)
-        [-4.6, 4.6].forEach((zPos, idx) => {
+        [-4.7, 4.7].forEach((zPos, idx) => {
             const postGroup = new THREE.Group();
             postGroup.position.set(sec.poleX, 0, zPos);
 
@@ -156,34 +157,71 @@ function buildStreetlamps() {
     });
 }
 
+/**
+ * Constrói os sensores TCRT5000 nas LATERAIS da pista (na calçada sul, rente ao meio-fio)
+ * apontando horizontalmente para a lateral/porta dos carros que trafegam na pista!
+ */
 function buildSensors() {
     SECTORS_DATA.forEach(sec => {
-        // Gabinete do sensor TCRT5000 rente ao piso
-        const boxGeo = new THREE.BoxGeometry(0.6, 0.1, 0.9);
-        const boxMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
-        const sensorBox = new THREE.Mesh(boxGeo, boxMat);
-        sensorBox.position.set(sec.poleX, 0.05, 1.2);
-        scene.add(sensorBox);
+        const totemGroup = new THREE.Group();
+        const lateralZ = 3.8; // Calçada sul, na borda da pista
+        const sensorY = 0.55; // Altura exata da porta/lateral do carrinho
 
-        // LED Emissor (Azul claro/invisível) e Fototransistor Receptor (Preto)
-        const eyeGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.15, 12);
-        const eyeEmitMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
-        const eyeRecMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+        totemGroup.position.set(sec.poleX, 0, lateralZ);
+
+        // 1. Pedestal / Totem de Suporte na Calçada (Simulando uma caixinha de radar de trânsito)
+        const pedestalGeo = new THREE.BoxGeometry(0.3, 0.45, 0.3);
+        const pedestalMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.5, roughness: 0.5 });
+        const pedestal = new THREE.Mesh(pedestalGeo, pedestalMat);
+        pedestal.position.y = 0.225;
+        totemGroup.add(pedestal);
+
+        // 2. Gabinete do Sensor TCRT5000 montado na horizontal apontando para a rua (-Z)
+        const sensorBodyGeo = new THREE.BoxGeometry(0.5, 0.35, 0.3);
+        const sensorBodyMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 });
+        const sensorBody = new THREE.Mesh(sensorBodyGeo, sensorBodyMat);
+        sensorBody.position.y = sensorY;
+        totemGroup.add(sensorBody);
+
+        // 3. Duas lentes apontando horizontalmente para o centro da pista
+        const eyeGeo = new THREE.CylinderGeometry(0.09, 0.09, 0.12, 12);
+        const eyeEmitMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 }); // Emissor IR
+        const eyeRecMat = new THREE.MeshBasicMaterial({ color: 0x111111 });  // Fototransistor
 
         const eye1 = new THREE.Mesh(eyeGeo, eyeEmitMat);
-        eye1.position.set(sec.poleX - 0.15, 0.12, 1.2);
-        scene.add(eye1);
+        eye1.rotation.x = Math.PI / 2; // Aponta na horizontal (-Z)
+        eye1.position.set(-0.12, sensorY, -0.16);
+        totemGroup.add(eye1);
 
         const eye2 = new THREE.Mesh(eyeGeo, eyeRecMat);
-        eye2.position.set(sec.poleX + 0.15, 0.12, 1.2);
-        scene.add(eye2);
+        eye2.rotation.x = Math.PI / 2; // Aponta na horizontal (-Z)
+        eye2.position.set(0.12, sensorY, -0.16);
+        totemGroup.add(eye2);
 
-        // Feixe visual indicador de detecção (ativo quando o carrinho passa)
-        const beamGeo = new THREE.CylinderGeometry(0.02, 0.3, 1.8, 16, 1, true);
-        const beamMat = new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0.0 });
+        // 4. Feixe óptico horizontal que cruza a pista da calçada até a faixa do carro
+        // O feixe vai de Z = 3.8 até Z = 1.2 (distância focal de 2.6 unidades)
+        const beamLength = 2.6;
+        const beamGeo = new THREE.ConeGeometry(0.4, beamLength, 16, 1, true);
+        const beamMat = new THREE.MeshBasicMaterial({ 
+            color: 0xef4444, 
+            transparent: true, 
+            opacity: 0.0,
+            side: THREE.DoubleSide
+        });
         const beam = new THREE.Mesh(beamGeo, beamMat);
-        beam.position.set(sec.poleX, 0.9, 1.2);
+        // Orienta o cone para disparar horizontalmente na direção da pista (-Z)
+        beam.rotation.x = -Math.PI / 2;
+        beam.position.set(sec.poleX, sensorY, lateralZ - (beamLength / 2));
         scene.add(beam);
+
+        // Plaquinha decorativa "RADAR LATERAL"
+        const tagGeo = new THREE.PlaneGeometry(0.4, 0.12);
+        const tagMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe, side: THREE.DoubleSide });
+        const tag = new THREE.Mesh(tagGeo, tagMat);
+        tag.position.set(0, 0.8, 0);
+        totemGroup.add(tag);
+
+        scene.add(totemGroup);
 
         sensorMeshes.push({ sectorId: sec.id, beamMat: beamMat });
     });
@@ -230,6 +268,7 @@ function buildCar() {
         carGroup.add(wheel);
     });
 
+    // Pista sul: o carro anda na faixa de Z = 1.2, passando em frente aos totens laterais em Z = 3.8
     carGroup.position.set(carPos, 0, 1.2);
     scene.add(carGroup);
 }
@@ -249,7 +288,7 @@ function animate3D(now) {
     const dt = (now - lastTime) / 1000;
     lastTime = now;
 
-    // Movimentação do veículo
+    // Movimentação contínua do veículo pela faixa
     if (isDriving && carGroup) {
         carPos += 7.0 * dt;
         if (carPos > 20) {
@@ -261,16 +300,17 @@ function animate3D(now) {
     let activeSectorCount = 0;
 
     SECTORS_DATA.forEach(sec => {
-        const carNearSensor = Math.abs(carPos - sec.poleX) < 1.4;
+        // O carro é detectado lateralmente quando seu corpo (X) cruza a frente do totem do setor
+        const carInFrontOfSensor = Math.abs(carPos - sec.poleX) < 1.6;
 
-        if (carNearSensor) {
+        if (carInFrontOfSensor) {
             sec.detected = true;
             sec.targetDuty = 255;
             sec.holdTimer = now;
             activeSectorCount++;
         } else {
             sec.detected = false;
-            // Regra dos 2,5 segundos
+            // Regra dos 2,5 segundos de segurança
             if (now - sec.holdTimer < 2500) {
                 sec.targetDuty = 255;
             } else {
@@ -291,9 +331,14 @@ function animate3D(now) {
         if (sec.lightA) sec.lightA.intensity = lightPower;
         if (sec.lightB) sec.lightB.intensity = lightPower;
 
+        // Atualiza a visualização do feixe horizontal infravermelho
         const sensorObj = sensorMeshes.find(s => s.sectorId === sec.id);
         if (sensorObj) {
-            sensorObj.beamMat.opacity = THREE.MathUtils.lerp(sensorObj.beamMat.opacity, sec.detected ? 0.75 : 0.0, 0.2);
+            sensorObj.beamMat.opacity = THREE.MathUtils.lerp(
+                sensorObj.beamMat.opacity, 
+                sec.detected ? 0.75 : 0.05, 
+                0.2
+            );
         }
 
         lampBulbMeshes.filter(b => b.sectorId === sec.id).forEach(b => {
@@ -306,10 +351,10 @@ function animate3D(now) {
     const badge = document.getElementById('simBadge');
     if (badge) {
         if (activeSectorCount > 0) {
-            badge.innerText = "🚗 VEÍCULO NA PISTA • ILUMINAÇÃO TOTAL NO SETOR ATIVO";
+            badge.innerText = "🚗 VEÍCULO DETECTADO LATERALMENTE • ILUMINAÇÃO TOTAL ATIVA";
             badge.style.color = "#fcd34d";
         } else {
-            badge.innerText = "🌙 PISTA LIVRE • MODO NOTURNO (14% DE LUZ ECONOMIZANDO ENERGIA)";
+            badge.innerText = "🌙 PISTA LIVRE • SENSORES LATERAIS ATIVOS EM MODO ECONÔMICO (14%)";
             badge.style.color = "var(--accent-cyan)";
         }
     }
@@ -340,7 +385,7 @@ function updateSectorTelemetryUI(sec) {
     pct.innerText = `${pctValue}%`;
 
     if (sec.detected) {
-        tag.innerText = "🚗 CARRO!";
+        tag.innerText = "🚗 LATERAL!";
         tag.className = "sensor-tag detected";
         state.innerText = "CARRO NA FRENTE";
         card.classList.add('active-sector');
@@ -398,6 +443,6 @@ function toggleNight() {
 
 function resetCamera() {
     if (!camera || !controls) return;
-    camera.position.set(0, 18, 28);
+    camera.position.set(0, 16, 26);
     controls.target.set(0, 1, 0);
 }

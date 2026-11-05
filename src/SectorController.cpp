@@ -21,8 +21,7 @@ ControladorSetor::ControladorSetor(const SetorPoste& configSetor)
 }
 
 void ControladorSetor::iniciar() {
-    // 1. Configura o pino do sensor como ENTRADA com pull-up interno ativo.
-    // O pull-up garante que o pino permaneça em 3.3V (HIGH) se o sensor estiver desconectado.
+    // 1. Ativa o resistor interno de 45kΩ do ESP32 (INPUT_PULLUP)
     pinMode(config.pinoSensor, INPUT_PULLUP);
 
     // 2. Configura a saída PWM do ESP32 de acordo com a versão do framework Arduino
